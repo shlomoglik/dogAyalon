@@ -1,0 +1,26 @@
+.scrollTop{
+    display: none;
+    position: fixed;
+    top:13rem;
+    right:0;
+    color: transparent;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    transition: all .2s;
+    box-shadow: var(--box-shadow-light);
+    text-align: center;
+    animation: 1s shake;
+    &:hover{
+        cursor: pointer;
+        transform: translateY(-.3rem);
+    }
+    &:active{
+        transform: translateY(0);
+    }
+    &__icon{
+        width: 3.5rem;
+        height: 3.5rem;
+        fill: var(--color-grey-dark-3);
+    }
+}

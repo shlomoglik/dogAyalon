@@ -1,0 +1,21 @@
+{
+    "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+   "headers": [
+      {
+        "source": "public/img/.@(svg)",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "svg+xml"
+          }
+        ]
+      } 
+    ]
+  }
+}

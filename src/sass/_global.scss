@@ -1,0 +1,39 @@
+:root{
+
+    // COLORS
+
+    --color-grey-bg: #d3d3d380;
+
+    --color-white: #fff;
+    --color-black: #000;
+
+
+    // FONTS
+    --def-font-size: 1.6rem;
+    --def-font-family: 'Tahoma';
+
+    // BLOCKS
+    --box-shadow-1: 0 1rem 2rem rgba(0,0,0,0.2);;
+    --box-shadow-2: 0 .5rem 1rem rgba(0,0,0,0.4);
+    --box-shadow-3: .1rem .9rem 2rem rgba(0,0,0,0.4);
+}
+
+
+/* GLOBAL RESET */
+*{
+    padding: 0;
+    margin: 0;
+    &,
+    &::before,
+    &::after{
+        font-size: 62.5%;
+        box-sizing: border-box;
+    }
+}
+body{
+    font-family: var(--def-font-family), sans-serif;
+    font-weight: 300;
+    font-size: 2rem;
+    line-height: 1.2;
+    user-select: none;
+}

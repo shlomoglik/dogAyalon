@@ -1,0 +1,19 @@
+config:
+1- run => npm i
+2- firebase/firebaseConfig => copy firebase config for web
+3- run => firebase init
+>>> ready to start!!
+
+dev:
+1- run => npm start
+2- run => sass:watch
+3- run => firebase serve
+>>> ready to dev!!
+
+prod:
+1- run => npm run prod
+2- index.html => change to <script src prod>
+3- index.html => change <script src prod> name to something like -prod.bundle010119.js
+4- prod.bundle => change prod.bunlde name in the same name
+5- run => firebase deploy [--only functions | hosting | storage]
+>>> ready to go!!
