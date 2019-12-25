@@ -5,6 +5,7 @@ config:
 >>> ready to start!!
 
 dev:
+
 1- run => npm start
 2- run => sass:watch
 3- run => firebase serve

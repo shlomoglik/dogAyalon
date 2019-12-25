@@ -1,2 +1,4 @@
 *node_modules
 *.txt
+src/firebase/initFirebase.js
+firebase-debug.log

@@ -1,15 +1,15 @@
 {
-  "name": "starter-mitrhil-and-firebase",
+  "name": "dog-ayalon",
   "version": "0.0.1",
-  "description": "some useful files for starter project in mithril as frontend with firebase",
-  "main": "app.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "dev:watch": "webpack -d --config webpack.dev.js --watch",
     "prod": "webpack --config webpack.prod.js",
     "size": "webpack -p --config ‏‏webpack.size.js",
     "open": "start chrome  http://localhost:3000 ",
+    "start": "npm run dev:watch",
     "sass:watch": "node-sass src/sass/main.scss src/style.css -w",
-    "start": "npm-run-all --parallel dev:watch",
     "prefix:css": "postcss --use autoprefixer -b 'last 10 versions' src/sass/style.css -o public/style.prefix.css",
     "compress:css": "node-sass public/style.prefix.css public/style.comp.css --output-style compressed",
     "build:css": "npm-run-all  prefix:css compress:css"
@@ -18,14 +18,13 @@
     "type": "git",
     "url": ""
   },
-  "author": "",
+  "author": "shlomoglik",
   "license": "MIT",
   "devDependencies": {
     "@types/react": "^16.8.17",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
     "css-loader": "^1.0.0",
@@ -38,6 +37,7 @@
     "webpack-cli": "^3.1.0"
   },
   "dependencies": {
-    "mithril": "^1.1.6"
+    "firebase": "^7.2.3",
+    "mithril": "^1.1.7"
   }
 }

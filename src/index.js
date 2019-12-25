@@ -1,26 +1,21 @@
+import app from './firebase/initFirebase';
 import m from 'mithril';
 const root = document.body;
 
-import './style.css';
 
-//functions
+//FUNCTIONS
+export const auth = firebase.auth(app);
+export const db = firebase.firestore();
 // m.route.prefix('?')
 
-//Views
-import UserPage from './views/UserPage/UserPage';
-
-//data
-import {getDoc} from './firebase/getData'
+import './style.scss';
+import { Home } from './views/pages/home/Home';
+import { Login } from './views/pages/login/Login';
+import { NewInvitation } from './views/pages/newInvitation/NewInvitation';
 
 //routes config
-m.route(root, "/login", {
-    "/login": LoginPage,
-    "/user": {
-        onmatch: () => {
-            let logged = true //define logged check;
-            if (logged)
-                return UserPage
-            else m.route.set('/login')
-        }
-    },
+m.route(root, "/home", {
+    "/home": Home,
+    "/login": Login,
+    "/app/invite":NewInvitation
 });

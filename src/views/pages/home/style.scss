@@ -1,0 +1,41 @@
+.home{
+    .photos{
+        display: grid;
+        gap: 1rem;
+        img{
+            width: 50vh;
+            border-radius: 3rem;
+        }
+        &__nav{
+            align-self: flex-end;
+            display: grid;
+            grid-auto-flow: column;
+            justify-items: center;
+            cursor: pointer;
+            &-link{
+                width: 3rem;
+                height: 3rem;
+                background-color: var(--color-gray-1);
+                border: 0.5px solid var(--color-gray-2);
+                border-radius: 50%;
+                box-shadow: var(--box-shadow-light);
+            }
+        }
+    }
+    
+    .welcome{
+        &__title{
+            font-size: 2rem;
+            font: inherit;
+            font-size: 3rem;
+        }
+        &__login-link{
+            font: inherit;
+            color: cornflowerblue;
+            cursor: pointer;
+            &:hover{
+                text-decoration: underline;
+            }
+        }
+    }
+}

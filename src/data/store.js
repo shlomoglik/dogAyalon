@@ -1,5 +1,3 @@
-const store = {
-};
-
-module.exports = store;
-
+export const store = {
+    user:{},
+}

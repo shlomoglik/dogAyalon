@@ -1,0 +1,34 @@
+.login{
+    .back{
+        font: inherit;
+        font-size: 2rem;
+        font-weight: 400;
+        color: cornflowerblue;
+        cursor: pointer;
+        &:hover{
+            text-decoration: underline;
+        }
+        justify-self: start;
+    }
+    &__title{
+        font: inherit;
+        font-size: 3rem;
+    }
+    &__form{
+        display: grid;
+        gap: 1rem;
+        .button{
+            outline: none;
+            border: none;
+            background-color: #fff;
+            border-radius: 1rem;
+            // width: 10rem;
+            padding: 1rem;
+            box-shadow: var(--box-shadow-1);
+            cursor: pointer;
+            img{
+                width: 4rem;
+            }
+        }
+    }
+}
