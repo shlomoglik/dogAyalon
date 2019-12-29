@@ -1,9 +1,12 @@
 import m from "mithril";
 
+import { loginWithGoogleData } from "../../../utils/auth";
+
 import { PageLayout } from "../../layout/page/Page";
 import { CardLayout } from "../../layout/card/Card";
 
 import "./style.scss"
+import { auth } from "../../../index";
 
 export const Home = node => {
     const images = [
@@ -15,7 +18,10 @@ export const Home = node => {
                 m(PageLayout, { class: "home" }, [
                     m(CardLayout, { class: "welcome" },
                         m(".welcome__title", "ברוכים הבאים לפנסיון הכלבים של חוות עמק איילון"),
-                        m(".welcome__login-link", { onclick: e => m.route.set("/login") }, "להתחברות לחץ כאן")
+                        auth.currentUser === null ?
+                            m(".welcome__login-link", { onclick: e => m.route.set("/login") }, "להתחברות לחץ כאן")
+                            :
+                            m(".welcome__login-link", { onclick: e => m.route.set("/app/invite") }, "להזמנת מקום לפנסיון")
                     ),
                     m(CardLayout, { class: "photos" },
                         images.map(img => m("img", { src: img.src })),

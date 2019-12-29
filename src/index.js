@@ -17,5 +17,6 @@ import { NewInvitation } from './views/pages/newInvitation/NewInvitation';
 m.route(root, "/home", {
     "/home": Home,
     "/login": Login,
-    "/app/invite":NewInvitation
+    // "/app/invite": { onmatch: args => auth.currentUser === null ? Login : NewInvitation }
+    "/app/invite": NewInvitation
 });
