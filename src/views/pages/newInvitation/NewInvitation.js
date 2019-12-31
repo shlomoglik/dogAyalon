@@ -3,6 +3,7 @@ import { PageLayout } from "../../layout/page/Page"
 import { CardLayout } from "../../layout/card/Card"
 
 import "./style.scss"
+import { Icon } from "../../commons/Icon/Icon"
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -21,18 +22,18 @@ export const NewInvitation = node => {
         node.state.searchList = node.state.searchList === ind ? false : ind
     }
 
-    const originalList
-    const filterList = (localList, term ) => {
-        originalList = Object.assign({}, localList)
-        if (term.length >= 2) {
-            Object.entries(localList).forEach(([key, val]) => {
-                if (val.trim().indexOf(term.trim()) !== -1) {
-                    localList[key] = val
-                } else {
-                    delete localList[key]
-                }
-            })
-        }
+    let originalList
+    const filterList = (localList, term) => {
+        originalList = Object.assign(originalList || {}, localList)
+        // if (term.length >= 2) {
+        // Object.entries(originalList).forEach(([key, val]) => {
+        //     if (val.trim().indexOf(term.trim()) !== -1) {
+        //         localList[key] = val
+        //     } else {
+        //         localList[key]
+        //     }
+        // })
+        // // }
     }
 
     const Dogs = {
@@ -44,8 +45,22 @@ export const NewInvitation = node => {
         },
         data: [
             { name: "רקס", gender: "male", breed: "mixed" }
-        ]
+        ],
+        new: []
     }
+
+    const Users = {
+        headers: {
+            displayName: { label: "שם", type: inputTypes.TEXT },
+            phone: { label: "טלפון" },
+        },
+        data: [
+            { displayName: "שלמה", phone: "053-3393623" }
+        ],
+        new: [],
+        current: {}
+    }
+
     return {
         view: vnode => {
             return (
@@ -53,18 +68,14 @@ export const NewInvitation = node => {
                     m(".invite__title", "הזמנת מקום לפנסיון"),
                     m(".owner part", [
                         m(".part__title", "פרטי בעלים:"),
-                        m("label.part__label", [
-                            "שם הבעלים:",
-                            m(".part__input",
-                                m(`input#ownerName.part__input-field`, { value: "שלמה" })
-                            )
-                        ]),
-                        m("label.part__label", [
-                            "טלפון:",
-                            m(".part__input",
-                                m(`input#ownerPhone.part__input-field`, { value: "053-3393623" })
-                            )
-                        ]),
+                        [...Users.data].map((doc, index) => {
+                            return Object.entries(Users.headers).map(([headerKey, headerObj]) => {
+                                return m("label.part__label", [
+                                    headerObj.label + ":",
+                                    m(".part__input", m(`input.part__input-field`, { value: doc[headerKey] }))
+                                ])
+                            })
+                        })
                     ]),
                     m(".part part--dogs", [
                         m(".part__title", "כלבים:"),
@@ -72,16 +83,22 @@ export const NewInvitation = node => {
                             return Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
                                 switch (true) {
                                     case headerObj.type === inputTypes.SELECT:
+                                        let list = Object.assign({},headerObj.options)
                                         return m(`label.part__label`, { for: `${headerKey}_${index}` }, [
                                             headerObj.label,
                                             m(".part__input part__input--select", {
                                                 onclick: e => toggleSearch(ind),
                                                 "data-search": ind === vnode.state.searchList
                                             }, [
-                                                m(`.part__input-field`, headerObj.options[doc[headerKey]]),
+                                                m(`.part__input-field part__input-field--select`, [
+                                                    headerObj.options[doc[headerKey]],
+                                                    m(Icon, { icon: "icon-triangle-down" })
+                                                ]),
                                                 m(".form", { onclick: evt => evt.stopPropagation() }, [
-                                                    m("input[type='search'][autoFocus][placeholder='חפש...']", { onkeyup: e => filterList(headerObj.options, e.target.value) }),
-                                                    Object.entries(headerObj.options).map(([key, value], ind) => {
+                                                    m("input[type='search'][autoFocus][placeholder='חפש...']", {
+                                                        oninput: e => filterList(headerObj.options, e.target.value),
+                                                    }),
+                                                    Object.entries(list).map(([key, value], ind) => {
                                                         return m(".option", {
                                                             id: key,
                                                             onclick: e => {

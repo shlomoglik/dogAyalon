@@ -1,0 +1,13 @@
+.icon {
+  //initial size
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &__svg {
+    width: 2rem;
+    height: 2rem;
+    fill: var(--color-non-active);
+  }
+}

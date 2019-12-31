@@ -1,5 +1,5 @@
 import m from "mithril"
-import { TopBar } from "../../commons/TopBar/TopBar"
+import { TopBar } from "../../components/TopBar/TopBar"
 
 import "./style.scss"
 
