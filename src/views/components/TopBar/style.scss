@@ -8,14 +8,25 @@
     box-shadow: var(--box-shadow-light);
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 1fr;
 
 }
 .user{
-    align-self: flex-end;
+    align-self: center;
     justify-self: flex-end;
     &__img{
         width: 5rem;
         border-radius: 50%;
+    }
+}
+.logout{
+    align-self: center;
+    justify-self: flex-start;
+    font-size: 2rem;
+    color: var(--color-active);
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
+        background-color: var(--color-bg-light);
     }
 }

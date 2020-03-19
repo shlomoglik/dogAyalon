@@ -1,9 +1,12 @@
 import m from "mithril"
 import { PageLayout } from "../../layout/page/Page"
 import { CardLayout } from "../../layout/card/Card"
-
-import "./style.scss"
 import { Icon } from "../../commons/Icon/Icon"
+
+import "./style.scss";
+import { db, auth } from "../../../index";
+import { store } from "../../../data/store";
+import { docListener } from "../../../data/get/listen";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -22,18 +25,12 @@ export const NewInvitation = node => {
         node.state.searchList = node.state.searchList === ind ? false : ind
     }
 
-    let originalList
-    const filterList = (localList, term) => {
-        originalList = Object.assign(originalList || {}, localList)
-        // if (term.length >= 2) {
-        // Object.entries(originalList).forEach(([key, val]) => {
-        //     if (val.trim().indexOf(term.trim()) !== -1) {
-        //         localList[key] = val
-        //     } else {
-        //         localList[key]
-        //     }
-        // })
-        // // }
+    const matchToFilter = (term, value) => {
+        let match = true
+        if (term && term.length >= 2) {
+            match = value.trim().indexOf(term.trim()) !== -1
+        }
+        return match
     }
 
     const Dogs = {
@@ -48,33 +45,103 @@ export const NewInvitation = node => {
         ],
         new: []
     }
-
-    const Users = {
+    const Clients = {
         headers: {
-            displayName: { label: "שם", type: inputTypes.TEXT },
-            phone: { label: "טלפון" },
+            clientName: { label: "שם", type: inputTypes.TEXT },
+            clientEmail: { label: "אימייל", type: inputTypes.TEXT },
+            clientPhone: { label: "טלפון" },
         },
         data: [
-            { displayName: "שלמה", phone: "053-3393623" }
+            // { displayName: "שלמה", phone: "053-3393623" }
         ],
         new: [],
-        current: {}
+        // current: { docID: 1, clientName: "שלמה", clientPhone: "053-3393623" },
+        current: {},
+        addNew: () => Clients.new.push({
+            docID: Clients.new.length + 1,
+            clientName: "",
+            clientEmail: "",
+            clientPhone: ""
+        })
+    }
+    const Contacts = {
+        headers: {
+            contactName: { label: "שם", type: inputTypes.TEXT },
+            contactEmail: { label: "אימייל", type: inputTypes.TEXT },
+            contactPhone: { label: "טלפון" },
+        },
+        data: [],
+        new: [],
+        addNew: () => Contacts.new.push({
+            docID: Contacts.new.length + 1,
+            contactName: "",
+            contactEmail: "",
+            contactPhone: ""
+        })
+    }
+
+    setTimeout(() => {
+        docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
+        m.redraw()
+    }, 1500);
+
+    const removeOne = (source,dataSource, docID) => {
+        source[dataSource] = source[dataSource].filter(doc => doc.docID !== docID)
+        source[dataSource].forEach((doc, ind) => doc.docID = ind + 1)
+    }
+    const saveOne = (source,dataSource, doc) => {
+        //TODO: save to DB and create listener to add one to data
     }
 
     return {
+        filterListTerm: [],
         view: vnode => {
             return (
                 m(PageLayout, { class: "invite" }, [
                     m(".invite__title", "הזמנת מקום לפנסיון"),
                     m(".owner part", [
-                        m(".part__title", "פרטי בעלים:"),
-                        [...Users.data].map((doc, index) => {
-                            return Object.entries(Users.headers).map(([headerKey, headerObj]) => {
+                        m(".part__title", [
+                            "פרטי קשר:",
+                            m(Icon, { icon: "icon-plus", action: e => Contacts.addNew() })
+                        ]),
+                        m("span.caption", "בעלים"),
+                        [...Clients.data].map(client => {
+                            return Object.entries(Clients.headers).map(([headerKey, headerObj]) => {
                                 return m("label.part__label", [
                                     headerObj.label + ":",
-                                    m(".part__input", m(`input.part__input-field`, { value: doc[headerKey] }))
+                                    m(".part__input", m(`input.part__input-field][disabled]`, { value: client[headerKey] }))
                                 ])
                             })
+                        }),
+                        [...Contacts.data].map((doc, index) => {
+                            return [
+                                m("span.caption", `איש קשר נוסף[${doc.docID}]`),
+                                Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
+                                    return m("label.part__label", [
+                                        headerObj.label + ":",
+                                        m(".part__input", m(`input.part__input-field`, { value: doc[headerKey], oninput: e => doc[headerKey] = e.target.value }))
+                                    ])
+                                }),
+                                m(".buttons", [
+                                    m("span.button__text.button__text--remove", { onclick: e => removeOne(Contacts,"data", doc.docID) }, "מחק"),
+                                    m("span.button__text.button__text--add", { onclick: e => saveOne(Contacts,"data", doc) }, "שמור"),
+                                ])
+                            ]
+                        }),
+                        [...Contacts.new].map((doc, index) => {
+                            return [
+                                m("span.caption", `איש קשר נוסף[${doc.docID}]`),
+                                Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
+                                    return m("label.part__label", [
+                                        headerObj.label + ":",
+                                        m(".part__input", m(`input.part__input-field`, { value: doc[headerKey], oninput: e => doc[headerKey] = e.target.value }))
+                                    ])
+                                }),
+                                m(".buttons", [
+                                    m("span.button__text.button__text--remove", { onclick: e => removeOne(Contacts, "new", doc.docID ) }, "מחק"),
+                                    m("span.button__text.button__text--add", { onclick: e => saveOne(Contacts,"new" ,doc) }, "שמור"),
+                                ])
+                            ]
                         })
                     ]),
                     m(".part part--dogs", [
@@ -83,7 +150,8 @@ export const NewInvitation = node => {
                             return Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
                                 switch (true) {
                                     case headerObj.type === inputTypes.SELECT:
-                                        let list = Object.assign({},headerObj.options)
+                                        let list = Object.assign({}, headerObj.options)
+                                        const filterTerm = vnode.state.filterListTerm[ind];
                                         return m(`label.part__label`, { for: `${headerKey}_${index}` }, [
                                             headerObj.label,
                                             m(".part__input part__input--select", {
@@ -92,14 +160,16 @@ export const NewInvitation = node => {
                                             }, [
                                                 m(`.part__input-field part__input-field--select`, [
                                                     headerObj.options[doc[headerKey]],
-                                                    m(Icon, { icon: "icon-triangle-down" })
+                                                    m(Icon, { icon: "icon-triangle-down", action: (e) => null })
                                                 ]),
                                                 m(".form", { onclick: evt => evt.stopPropagation() }, [
                                                     m("input[type='search'][autoFocus][placeholder='חפש...']", {
-                                                        oninput: e => filterList(headerObj.options, e.target.value),
+                                                        // oninput: e => filterList(headerObj.options, e.target.value),
+                                                        value: vnode.state.filterListTerm[ind] || '',
+                                                        oninput: e => vnode.state.filterListTerm[ind] = e.target.value,
                                                     }),
                                                     Object.entries(list).map(([key, value], ind) => {
-                                                        return m(".option", {
+                                                        return matchToFilter(filterTerm, value) === true && m(".option", {
                                                             id: key,
                                                             onclick: e => {
                                                                 doc[headerKey] = key
