@@ -15,10 +15,12 @@ $end:left;
     --color-bg-3: #ecf0f661;
 
     --color-non-active: #a2a2c4;
-    --color-active: #234aa9;
-    --color-active-light: #2349a99f;
-    --color-active-trs: #2349a94d;
-    --color-active-dark:#333666;
+    --color-txt-p: #234aa9;
+    --color-txt-p-light: #2349a99f;
+    --color-txt-p-trs: #2349a94d;
+    --color-txt-p-dark:#333666;
+
+    --color-bg-dark:#333666;
 
     --color-red:#eb2f64;
     --color-red-trs:#ea2e6399;
@@ -80,7 +82,7 @@ body{
     transition: transform .2s;
     cursor: pointer;
     &--add{
-        background: var(--color-active);
+        background: var(--color-bg-dark);
         color: var(--color-white);
     }
     &:hover{

@@ -23,7 +23,7 @@ export const queryListener = (dataSource, query) => {
                 dataSource.splice(index, 1)
             }
         })
-        // console.log(dataSource)
+        m.redraw();
     })
     return unsubscribe
 }

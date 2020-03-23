@@ -6,7 +6,7 @@ import { Icon } from "../../commons/Icon/Icon"
 import "./style.scss";
 import { db, auth } from "../../../index";
 import { store } from "../../../data/store";
-import { docListener } from "../../../data/get/listen";
+import { docListener, queryListener } from "../../../data/get/listen";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -46,14 +46,15 @@ export const NewInvitation = node => {
         new: []
     }
     const Clients = {
+        meta: {
+            routes: { collection: "clients" }
+        },
         headers: {
             clientName: { label: "שם", type: inputTypes.TEXT },
-            clientEmail: { label: "אימייל", type: inputTypes.TEXT },
+            clientEmail: { label: "אימייל", type: inputTypes.TEXT, disabled: true },
             clientPhone: { label: "טלפון" },
         },
-        data: [
-            // { displayName: "שלמה", phone: "053-3393623" }
-        ],
+        data: [],
         new: [],
         // current: { docID: 1, clientName: "שלמה", clientPhone: "053-3393623" },
         current: {},
@@ -65,6 +66,9 @@ export const NewInvitation = node => {
         })
     }
     const Contacts = {
+        meta: {
+            routes: { collection: `clients/:userID/contacts` }
+        },
         headers: {
             contactName: { label: "שם", type: inputTypes.TEXT },
             contactEmail: { label: "אימייל", type: inputTypes.TEXT },
@@ -82,15 +86,56 @@ export const NewInvitation = node => {
 
     setTimeout(() => {
         docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
-        m.redraw()
-    }, 1500);
+        queryListener(Contacts.data, db.collection(`clients/${auth.currentUser.uid}/contacts`));
+    }, 1500)
 
-    const removeOne = (source,dataSource, docID) => {
+    const removeOneLocal = (source, dataSource, docID) => {
         source[dataSource] = source[dataSource].filter(doc => doc.docID !== docID)
         source[dataSource].forEach((doc, ind) => doc.docID = ind + 1)
     }
-    const saveOne = (source,dataSource, doc) => {
-        //TODO: save to DB and create listener to add one to data
+    const saveOne = (sourceModel, docToSave, docID) => {
+        let saveDoc = Object.assign(docToSave, {
+            updatedAt: new Date().toISOString(),
+            updatedBy: auth.currentUser.uid
+        })
+        const collectionPath = getCollectionPath(sourceModel.meta.routes.collection)
+        const path = `${collectionPath}/${docID}`;
+        db.doc(path).set(saveDoc, { merge: true })
+            .then(() => m.redraw())
+            .catch(err => alert(err))
+    }
+    const insertOne = (sourceModel, docToAdd) => {
+        let addDoc = Object.assign(docToAdd, {
+            createdAt: new Date().toISOString(),
+            createdBy: auth.currentUser.uid
+        })
+        const docID = addDoc.docID;
+        delete addDoc.docID;
+        const collectionPath = getCollectionPath(sourceModel.meta.routes.collection)
+        const colRef = db.collection(collectionPath);
+        colRef.add(addDoc)
+            .then(() => removeOneLocal(sourceModel, "new", docID))
+            .catch(err => alert(err))
+            .finally(() => m.redraw())
+    }
+
+    function getCollectionPath(_path) {
+        let path = _path;
+        let split = path.split("/");
+        if (split.length > 1) {
+            let replace = split.map(part => {
+                if (part.startsWith(":")) {
+                    switch (part) {
+                        case ":userID":
+                            return auth.currentUser.uid
+                    }
+                } else {
+                    return part
+                }
+            })
+            path = replace.join("/");
+        }
+        return path;
     }
 
     return {
@@ -99,68 +144,76 @@ export const NewInvitation = node => {
             return (
                 m(PageLayout, { class: "invite" }, [
                     m(".invite__title", "הזמנת מקום לפנסיון"),
-                    m(".owner part", [
-                        m(".part__title", [
+                    m(".owner group", [
+                        m(".group__title", [
                             "פרטי קשר:",
                             m(Icon, { icon: "icon-plus", action: e => Contacts.addNew() })
                         ]),
-                        m("span.caption", "בעלים"),
+                        m(".caption", m(".caption__text",`בעלים`)),
                         [...Clients.data].map(client => {
                             return Object.entries(Clients.headers).map(([headerKey, headerObj]) => {
-                                return m("label.part__label", [
+                                return m("label.group__label", [
                                     headerObj.label + ":",
-                                    m(".part__input", m(`input.part__input-field][disabled]`, { value: client[headerKey] }))
+                                    m(".group__input", m(`input.group__input-field${headerObj.disabled ? "[disabled]" : ""}`, {
+                                        value: client[headerKey],
+                                        oninput: e => client[headerKey] = e.target.value,
+                                        onblur: e => saveOne(Clients, { [headerKey]: e.target.value }, client.docID)
+                                    }))
                                 ])
                             })
                         }),
                         [...Contacts.data].map((doc, index) => {
                             return [
-                                m("span.caption", `איש קשר נוסף[${doc.docID}]`),
+                                m(".caption", [
+                                    m("span.caption__text", `איש קשר [${index + 1}]`),
+                                    m(Icon, { icon: "icon-triangle-down", class: "icon--action", action: e => null })
+                                ]),
                                 Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
-                                    return m("label.part__label", [
+                                    return m("label.group__label", [
                                         headerObj.label + ":",
-                                        m(".part__input", m(`input.part__input-field`, { value: doc[headerKey], oninput: e => doc[headerKey] = e.target.value }))
+                                        m(".group__input", m(`input.group__input-field`, {
+                                            value: doc[headerKey],
+                                            oninput: e => doc[headerKey] = e.target.value,
+                                            onblur: e => saveOne(Contacts, { [headerKey]: e.target.value }, doc.docID)
+                                        }))
                                     ])
-                                }),
-                                m(".buttons", [
-                                    m("span.button__text.button__text--remove", { onclick: e => removeOne(Contacts,"data", doc.docID) }, "מחק"),
-                                    m("span.button__text.button__text--add", { onclick: e => saveOne(Contacts,"data", doc) }, "שמור"),
-                                ])
+                                })
                             ]
                         }),
                         [...Contacts.new].map((doc, index) => {
                             return [
-                                m("span.caption", `איש קשר נוסף[${doc.docID}]`),
+                                m(".caption", m(".caption__text",`איש קשר נוסף[${doc.docID}]`)),
                                 Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
-                                    return m("label.part__label", [
+                                    return m("label.group__label", [
                                         headerObj.label + ":",
-                                        m(".part__input", m(`input.part__input-field`, { value: doc[headerKey], oninput: e => doc[headerKey] = e.target.value }))
+                                        m(".group__input", m(`input.group__input-field`, { value: doc[headerKey], oninput: e => doc[headerKey] = e.target.value }))
                                     ])
                                 }),
                                 m(".buttons", [
-                                    m("span.button__text.button__text--remove", { onclick: e => removeOne(Contacts, "new", doc.docID ) }, "מחק"),
-                                    m("span.button__text.button__text--add", { onclick: e => saveOne(Contacts,"new" ,doc) }, "שמור"),
+                                    m("span.button__text.button__text--remove", { onclick: e => removeOneLocal(Contacts, "new", doc.docID) }, "מחק"),
+                                    m("span.button__text.button__text--add", { onclick: e => insertOne(Contacts, doc) }, "הוסף"),
                                 ])
                             ]
                         })
                     ]),
-                    m(".part part--dogs", [
-                        m(".part__title", "כלבים:"),
+                    m(".group group--dogs", [
+                        m(".group__title", "כלבים:"),
                         [...Dogs.data].map((doc, index) => {
                             return Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
                                 switch (true) {
                                     case headerObj.type === inputTypes.SELECT:
                                         let list = Object.assign({}, headerObj.options)
                                         const filterTerm = vnode.state.filterListTerm[ind];
-                                        return m(`label.part__label`, { for: `${headerKey}_${index}` }, [
+                                        const isSearchMode = ind === vnode.state.searchList;
+                                        return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
                                             headerObj.label,
-                                            m(".part__input part__input--select", {
+                                            m(".group__input group__input--select", {
                                                 onclick: e => toggleSearch(ind),
-                                                "data-search": ind === vnode.state.searchList
+                                                "data-search": isSearchMode
                                             }, [
-                                                m(`.part__input-field part__input-field--select`, [
+                                                m(`.group__input-field group__input-field--select`, [
                                                     headerObj.options[doc[headerKey]],
-                                                    m(Icon, { icon: "icon-triangle-down", action: (e) => null })
+                                                    m(Icon, { icon: isSearchMode ? "icon-triangle-up" : "icon-triangle-down", action: (e) => null })
                                                 ]),
                                                 m(".form", { onclick: evt => evt.stopPropagation() }, [
                                                     m("input[type='search'][autoFocus][placeholder='חפש...']", {
@@ -181,10 +234,10 @@ export const NewInvitation = node => {
                                             ])
                                         ])
                                     default:
-                                        return m(`label.part__label`, { for: `${headerKey}_${index}` }, [
+                                        return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
                                             headerObj.label,
-                                            m(".part__input", [
-                                                m(`input#${headerKey}_${index}.part__input-field`, { value: doc[headerKey], type: headerObj.type })
+                                            m(".group__input", [
+                                                m(`input#${headerKey}_${index}.group__input-field`, { value: doc[headerKey], type: headerObj.type })
                                             ])
                                         ])
                                 }

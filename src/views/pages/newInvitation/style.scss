@@ -19,18 +19,27 @@
       box-shadow: none;
     }
     &--add {
-      color: var(--color-active);
+      color: var(--color-txt-p);
     }
     &--remove {
       color: var(--color-red);
     }
   }
-  .part {
+  .group {
     display: grid;
     gap: 1rem;
     .caption {
-      color: var(--color-non-active);
-      font-size: 1.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      &__text{
+        flex: 1;
+        font-size: 1.8rem;
+        color: var(--color-non-active);
+      }
+      .icon{
+
+      }
     }
     .buttons {
       display: flex;
@@ -42,7 +51,7 @@
     }
     &__title {
       font-size: 2rem;
-      color: var(--color-active);
+      color: var(--color-txt-p);
       font-weight: 600;
       position: relative;
       .icon {
@@ -58,12 +67,12 @@
           box-shadow: var(--box-shadow-light);
         }
         &__svg {
-          fill: var(--color-active);
+          fill: var(--color-txt-p);
         }
       }
     }
     &__label {
-      color: var(--color-active-light);
+      color: var(--color-txt-p-light);
       font-weight: 600;
       font-size: 1.8rem;
       display: grid;
@@ -71,6 +80,15 @@
       gap: 1rem;
       align-items: center;
       grid-template-columns: minmax(10rem, max-content) 1fr;
+      justify-items: center;
+      white-space: pre-wrap;
+    }
+    @media only screen and (max-width: 320px) {
+      &__label{
+        grid-template-columns: minmax(5rem, min-content) 1fr;
+        padding: .4rem;
+        text-overflow: clip;
+      }
     }
     &__input {
       justify-self: stretch;
@@ -89,7 +107,7 @@
         opacity: 0.4;
       }
       &:focus::after {
-        background-color: var(--color-active-light);
+        background-color: var(--color-txt-p-light);
         opacity: 1;
       }
       &--select {
@@ -118,7 +136,7 @@
             border-radius: 1rem;
             outline: none;
             font-size: 1.6rem;
-            color: var(--color-active);
+            color: var(--color-txt-p);
             background: var(--color-bg-3);
             border: 1px solid lightgray;
           }
@@ -129,12 +147,18 @@
             font-weight: 300;
             color: var(--color-non-active);
             &:hover {
-              color: var(--color-active);
+              color: var(--color-txt-p);
               background-color: var(--color-bg-2);
             }
           }
         }
       }
+      &[data-search]{
+        svg{
+          fill: var(--color-txt-p);
+        }
+      }
+
       &-field {
         border: none;
         outline: none;
@@ -176,3 +200,5 @@
   &__additional {
   }
 }
+
+

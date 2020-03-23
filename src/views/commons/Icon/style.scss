@@ -10,4 +10,10 @@
     height: 2rem;
     fill: var(--color-non-active);
   }
+  &--action{
+    background-color: lightgray;
+    border-radius: 3rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
 }
