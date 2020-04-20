@@ -4,4 +4,24 @@
     border-radius: 2rem;
     box-shadow: var(--box-shadow-light);
     font: inherit;
+    @media only screen and (max-width: 360px) {
+        & {
+            padding: 1rem .5rem 1rem .5rem;
+        }
+    }
+    &.new{
+        background-color: var(--color-bg-1);
+    }
+    &.addNew{
+        div{
+            cursor: pointer;
+            font-size: 2rem;
+            color: var(--color-txt-p);
+            border-radius: 1rem;
+            padding: 1rem;
+            &:hover{
+                background-color: var(--color-bg-3);
+            }
+        }
+    }
 }

@@ -7,18 +7,25 @@
 	align-content: flex-start;
 	gap: 1rem;
     &__tab {
+        padding: 1rem;
         border-bottom: 1px solid lightgray;
-        font: inherit;
-        font-size: 1.8rem;
         color: var(--color-non-active);
+        display: flex;
         transition: all 0.2s ease-in-out;
         cursor: pointer;
+        span{
+            font: inherit;
+            font-size: 1.8rem;
+        }
         &:hover {
             color: var(--color-txt-p);
         }
         &[data-active="true"] {
             color: var(--color-txt-p);
             border-bottom: 2px solid var(--color-txt-p);
+            & .icon__svg{
+                fill: var(--color-txt-p);
+            }
         }
     }
 }

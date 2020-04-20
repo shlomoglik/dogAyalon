@@ -1,15 +1,16 @@
 .topBar{
-    position: absolute;
+    position: sticky;
     min-width: 100vw;
+    justify-self: stretch;
     padding: 1rem;
     top: 0;
     left: 0;
+    z-index: 1;
     background-color: #fff;
     box-shadow: var(--box-shadow-light);
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
-
 }
 .user{
     align-self: center;
