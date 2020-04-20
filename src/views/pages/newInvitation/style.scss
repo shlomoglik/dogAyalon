@@ -28,18 +28,9 @@
   .group {
     display: grid;
     gap: 1rem;
-    .caption {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      &__text{
-        flex: 1;
-        font-size: 1.8rem;
-        color: var(--color-non-active);
-      }
-      .icon{
-
-      }
+    .card{
+      display: grid;
+      gap: 1rem;
     }
     .buttons {
       display: flex;
@@ -92,24 +83,24 @@
     }
     &__input {
       justify-self: stretch;
-      border-radius: 1rem;
-      background-color: #f0f0f0;
-      position: relative;
-      transition: all 0.6s ease-in-out;
-      &::after {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        content: "";
-        width: 100%;
-        height: 1px;
-        background-color: var(--color-non-active);
-        opacity: 0.4;
-      }
-      &:focus::after {
-        background-color: var(--color-txt-p-light);
-        opacity: 1;
-      }
+      // border-radius: 1rem;
+      // background-color: #f0f0f0;
+      // position: relative;
+      // transition: all 0.6s ease-in-out;
+      // &::after {
+      //   position: absolute;
+      //   top: 100%;
+      //   left: 0;
+      //   content: "";
+      //   width: 100%;
+      //   height: 1px;
+      //   background-color: var(--color-non-active);
+      //   opacity: 0.4;
+      // }
+      // &:focus-within::after {
+      //   background-color: var(--color-txt-p-light);
+      //   opacity: 1;
+      // }
       &--select {
         position: relative;
         &[data-search] .form {
@@ -189,15 +180,6 @@
         }
       }
     }
-  }
-
-  &__dogs {
-  }
-  &__contacts {
-  }
-  &__info {
-  }
-  &__additional {
   }
 }
 

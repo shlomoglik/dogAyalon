@@ -1,0 +1,16 @@
+.caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    &__text {
+        flex: 1;
+        font-size: 1.8rem;
+        color: var(--color-non-active);
+        transition: background .2s ease-in-out;
+        &:hover{
+            background: var(--color-bg-layout);
+        }
+    }
+    .icon {
+    }
+}

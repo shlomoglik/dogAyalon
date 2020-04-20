@@ -7,6 +7,8 @@ import "./style.scss";
 import { db, auth } from "../../../index";
 import { store } from "../../../data/store";
 import { docListener, queryListener } from "../../../data/get/listen";
+import { Tabs } from "../../components/tabs/Tabs";
+import { Caption } from "../../commons/caption/Caption";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -84,10 +86,15 @@ export const NewInvitation = node => {
         })
     }
 
-    setTimeout(() => {
-        docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
-        queryListener(Contacts.data, db.collection(`clients/${auth.currentUser.uid}/contacts`));
-    }, 1500)
+    Promise.resolve(setTimeout(() => {
+        if (auth.currentUser !== null) {
+            docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
+            queryListener(Contacts.data, db.collection(`clients/${auth.currentUser.uid}/contacts`));
+        } else {
+            m.route.set("/login")
+        }
+    }, 1500))
+        .then(() => m.redraw())
 
     const removeOneLocal = (source, dataSource, docID) => {
         source[dataSource] = source[dataSource].filter(doc => doc.docID !== docID)
@@ -140,34 +147,36 @@ export const NewInvitation = node => {
 
     return {
         filterListTerm: [],
+        currentTab: "contacts",
         view: vnode => {
             return (
                 m(PageLayout, { class: "invite" }, [
                     m(".invite__title", "הזמנת מקום לפנסיון"),
-                    m(".owner group", [
+                    m(Tabs, { parent: vnode, tabObj: { contacts: { label: "פרטי קשר" }, dogs: { label: "כלבים" } } }),
+
+                    vnode.state.currentTab === "contacts" && m(".owner group", [
                         m(".group__title", [
                             "פרטי קשר:",
                             m(Icon, { icon: "icon-plus", action: e => Contacts.addNew() })
                         ]),
-                        m(".caption", m(".caption__text",`בעלים`)),
-                        [...Clients.data].map(client => {
-                            return Object.entries(Clients.headers).map(([headerKey, headerObj]) => {
-                                return m("label.group__label", [
-                                    headerObj.label + ":",
-                                    m(".group__input", m(`input.group__input-field${headerObj.disabled ? "[disabled]" : ""}`, {
-                                        value: client[headerKey],
-                                        oninput: e => client[headerKey] = e.target.value,
-                                        onblur: e => saveOne(Clients, { [headerKey]: e.target.value }, client.docID)
-                                    }))
-                                ])
-                            })
-                        }),
+                        m(CardLayout, [
+                            m(Caption, { text: "בעלים" }),
+                            [...Clients.data].map(client => {
+                                return Object.entries(Clients.headers).map(([headerKey, headerObj]) => {
+                                    return m("label.group__label", [
+                                        headerObj.label + ":",
+                                        m(".group__input", m(`input.group__input-field${headerObj.disabled ? "[disabled]" : ""}`, {
+                                            value: client[headerKey],
+                                            oninput: e => client[headerKey] = e.target.value,
+                                            onblur: e => saveOne(Clients, { [headerKey]: e.target.value }, client.docID)
+                                        }))
+                                    ])
+                                })
+                            }),
+                        ]),
                         [...Contacts.data].map((doc, index) => {
-                            return [
-                                m(".caption", [
-                                    m("span.caption__text", `איש קשר [${index + 1}]`),
-                                    m(Icon, { icon: "icon-triangle-down", class: "icon--action", action: e => null })
-                                ]),
+                            return m(CardLayout, [
+                                m(Caption, { text: `איש קשר [${index + 1}]`, icon: "icon-triangle-down", iconClass: "icon--action" }),
                                 Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
                                     return m("label.group__label", [
                                         headerObj.label + ":",
@@ -178,11 +187,12 @@ export const NewInvitation = node => {
                                         }))
                                     ])
                                 })
-                            ]
+
+                            ])
                         }),
                         [...Contacts.new].map((doc, index) => {
                             return [
-                                m(".caption", m(".caption__text",`איש קשר נוסף[${doc.docID}]`)),
+                                m(Caption, { text: `איש קשר נוסף[${doc.docID}]` }),
                                 Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
                                     return m("label.group__label", [
                                         headerObj.label + ":",
@@ -196,52 +206,55 @@ export const NewInvitation = node => {
                             ]
                         })
                     ]),
-                    m(".group group--dogs", [
+
+                    vnode.state.currentTab === "dogs" && m(".group group--dogs", [
                         m(".group__title", "כלבים:"),
                         [...Dogs.data].map((doc, index) => {
-                            return Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
-                                switch (true) {
-                                    case headerObj.type === inputTypes.SELECT:
-                                        let list = Object.assign({}, headerObj.options)
-                                        const filterTerm = vnode.state.filterListTerm[ind];
-                                        const isSearchMode = ind === vnode.state.searchList;
-                                        return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
-                                            headerObj.label,
-                                            m(".group__input group__input--select", {
-                                                onclick: e => toggleSearch(ind),
-                                                "data-search": isSearchMode
-                                            }, [
-                                                m(`.group__input-field group__input-field--select`, [
-                                                    headerObj.options[doc[headerKey]],
-                                                    m(Icon, { icon: isSearchMode ? "icon-triangle-up" : "icon-triangle-down", action: (e) => null })
-                                                ]),
-                                                m(".form", { onclick: evt => evt.stopPropagation() }, [
-                                                    m("input[type='search'][autoFocus][placeholder='חפש...']", {
-                                                        // oninput: e => filterList(headerObj.options, e.target.value),
-                                                        value: vnode.state.filterListTerm[ind] || '',
-                                                        oninput: e => vnode.state.filterListTerm[ind] = e.target.value,
-                                                    }),
-                                                    Object.entries(list).map(([key, value], ind) => {
-                                                        return matchToFilter(filterTerm, value) === true && m(".option", {
-                                                            id: key,
-                                                            onclick: e => {
-                                                                doc[headerKey] = key
-                                                                toggleSearch()
-                                                            }
-                                                        }, value)
-                                                    })
+                            return m(CardLayout, [
+                                Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
+                                    switch (true) {
+                                        case headerObj.type === inputTypes.SELECT:
+                                            let list = Object.assign({}, headerObj.options)
+                                            const filterTerm = vnode.state.filterListTerm[ind];
+                                            const isSearchMode = ind === vnode.state.searchList;
+                                            return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
+                                                headerObj.label,
+                                                m(".group__input group__input--select", {
+                                                    onclick: e => toggleSearch(ind),
+                                                    "data-search": isSearchMode
+                                                }, [
+                                                    m(`.group__input-field group__input-field--select`, [
+                                                        headerObj.options[doc[headerKey]],
+                                                        m(Icon, { icon: isSearchMode ? "icon-triangle-up" : "icon-triangle-down", action: (e) => null })
+                                                    ]),
+                                                    m(".form", { onclick: evt => evt.stopPropagation() }, [
+                                                        m("input[type='search'][autoFocus][placeholder='חפש...']", {
+                                                            // oninput: e => filterList(headerObj.options, e.target.value),
+                                                            value: vnode.state.filterListTerm[ind] || '',
+                                                            oninput: e => vnode.state.filterListTerm[ind] = e.target.value,
+                                                        }),
+                                                        Object.entries(list).map(([key, value], ind) => {
+                                                            return matchToFilter(filterTerm, value) === true && m(".option", {
+                                                                id: key,
+                                                                onclick: e => {
+                                                                    doc[headerKey] = key
+                                                                    toggleSearch()
+                                                                }
+                                                            }, value)
+                                                        })
+                                                    ])
                                                 ])
                                             ])
-                                        ])
-                                    default:
-                                        return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
-                                            headerObj.label,
-                                            m(".group__input", [
-                                                m(`input#${headerKey}_${index}.group__input-field`, { value: doc[headerKey], type: headerObj.type })
+                                        default:
+                                            return m(`label.group__label`, { for: `${headerKey}_${index}` }, [
+                                                headerObj.label,
+                                                m(".group__input", [
+                                                    m(`input#${headerKey}_${index}.group__input-field`, { value: doc[headerKey], type: headerObj.type })
+                                                ])
                                             ])
-                                        ])
-                                }
-                            })
+                                    }
+                                })
+                            ])
                         })
                     ])
 

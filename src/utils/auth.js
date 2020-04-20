@@ -6,7 +6,13 @@ import { store } from "../data/store"
 
 export const loginWithGooglePopUp = async () => {
     try {
-        const userCred = await auth.signInWithPopup(googleProvider)
+        //[OPT 1]
+        // const userCred = await auth.signInWithPopup(googleProvider)
+        
+        //[OPT 2]
+        await auth.signInWithRedirect(googleProvider);
+        const userCred = auth.getRedirectResult();
+
         const userDoc = await db.collection("users").doc(userCred.user.uid).set({
             displayName: userCred.user.displayName,
             email: userCred.user.email,
@@ -26,7 +32,8 @@ export const loginWithGooglePopUp = async () => {
         const token = await userCred.user.getIdToken()
         sessionStorage.setItem("token", token)
         // console.log(store.user)
-        m.route.set("/app/invite")
+        m.route.set("/app/invite");
+        m.redraw();
     } catch (err) {
         console.error(err)
     } finally {
