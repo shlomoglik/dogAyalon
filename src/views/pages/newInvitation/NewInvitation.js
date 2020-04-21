@@ -85,6 +85,35 @@ export const NewInvitation = node => {
         })
     }
 
+    const Invitation = {
+        meta: {
+            routes: { collection: `clients/:userID/invitations` }
+        },
+        headers: {
+            dogs: { label: "כלבים" },
+            contacts: { label: "אנשי קשר" },
+            from: { label: "מתאריך" },
+            to: { label: "ועד תאריך" },
+        },
+        current: {
+            dogs: [],
+            contacts: [],
+            from: "",
+            to: ""
+        },
+        data: [],
+        addNew: () => null,
+    }
+
+    const toggleSelectInvitation = (item, docID) => {
+        const index = Invitation.current[item].findIndex(id => id === docID)
+        if (index === -1) {
+            Invitation.current[item].push(docID)
+        } else {
+            Invitation.current[item].splice(index - 1, 1)
+        }
+    }
+
     Promise.resolve(setTimeout(() => {
         if (auth.currentUser !== null) {
             docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
@@ -178,8 +207,61 @@ export const NewInvitation = node => {
                             ])
                         }),
                         m(CardLayout, { class: "addNew" }, m(".", { onclick: e => Dogs.addNew() }, "+ הוסף כלב"))
-                    ])
+                    ]),
 
+                    vnode.state.currentTab === "invitation" &&
+                    m(".group group--dogs",
+                        m(".group__title", "פרטי ההזמנה:"),
+                        m(CardLayout,
+                            m(Caption, { text: "אנשי קשר" }),
+                            [...Contacts.data].map(doc => {
+                                const isSelected = Invitation.current.contacts.includes(doc.docID)
+                                return m(".row", {
+                                    onclick: e => toggleSelectInvitation("contacts", doc.docID),
+                                    class: isSelected ? "row--active" : ""
+                                },
+                                    m(".row__cell",
+                                        m(".checkBox",
+                                            isSelected && m(Icon, { icon: "icon-check" })
+                                        )
+                                    ),
+                                    m(".row__cell", doc.contactName),
+                                )
+                            })
+                        ),
+                        m(CardLayout,
+                            m(Caption, { text: "כלבים" }),
+                            [...Dogs.data].map(doc => {
+                                const isSelected = Invitation.current.dogs.includes(doc.docID)
+                                return m(".row", {
+                                    onclick: e => toggleSelectInvitation("dogs", doc.docID),
+                                    class: isSelected ? "row--active" : ""
+                                },
+                                    m(".row__cell",
+                                        m(".checkBox",
+                                            isSelected && m(Icon, { icon: "icon-check" })
+                                        )
+                                    ),
+                                    m(".row__cell", doc.dogName),
+                                )
+                            })
+                        ),
+                        m(CardLayout, { class: "dates" },
+                            m(Caption, { text: "תאריכים" }),
+                            m(Input, {
+                                model: Invitation,
+                                doc: Invitation.current,
+                                headerKey: "from",
+                                headerObj: Invitation.headers.from
+                            }),
+                            m(Input, { 
+                                model: Invitation,
+                                doc: Invitation.current,
+                                headerKey: "to",
+                                headerObj: Invitation.headers.to 
+                            }),
+                        ),
+                    )
                 ])
             )
         }

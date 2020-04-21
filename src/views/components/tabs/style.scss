@@ -1,11 +1,12 @@
 .tabs {
-	display: grid;
-	grid-auto-flow: column;
-	justify-items: center;
-	justify-content: start;
-	align-items: center;
-	align-content: flex-start;
-	gap: 1rem;
+    display: grid;
+    grid-auto-flow: column;
+    justify-items: center;
+    justify-content: start;
+    align-items: flex-end;
+    align-content: flex-start;
+    gap: 1rem;
+    white-space: nowrap;
     &__tab {
         padding: 1rem;
         border-bottom: 1px solid lightgray;
@@ -16,6 +17,9 @@
         span{
             font: inherit;
             font-size: 1.8rem;
+            @media screen and (max-width: 360px){
+                font-size: 1.4rem;
+            }
         }
         &:hover {
             color: var(--color-txt-p);

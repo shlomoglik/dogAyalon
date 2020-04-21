@@ -4,6 +4,7 @@ import { saveOne } from "../../../data/utils";
 
 export const Input = node => {
 
+    console.log(node.attrs.headerObj)
     return {
         view: vnode => {
             return m("label.form__row group__row", [

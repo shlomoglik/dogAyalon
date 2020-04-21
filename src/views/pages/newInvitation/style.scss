@@ -14,7 +14,7 @@
       transform: scale(1.1);
       box-shadow: var(--box-shadow-light);
     }
-    &:active{
+    &:active {
       transform: scale(1);
       box-shadow: none;
     }
@@ -28,7 +28,9 @@
   .group {
     display: grid;
     gap: 1rem;
-    .card{
+    width: -webkit-fill-available;
+    margin: 1rem;
+    .card {
       display: grid;
       gap: 1rem;
     }
@@ -65,4 +67,37 @@
   }
 }
 
-
+.row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 5rem auto;
+  box-shadow: var(--box-shadow-1);
+  border-radius: 1rem;
+  transition: transform .2s ease-in-out;
+  cursor: pointer;
+  color: var(--color-non-active);
+  &:hover .checkBox{
+    transform: scale(1.1);
+    border-color: var(--color-txt-p-light);
+  }
+  &--active{
+    color: var(--color-txt-p);
+  }
+  &__cell {
+    font-size: 1.8rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .checkBox{
+      width: 3rem;
+      height: 3rem;
+      border: 1px solid var(--color-bg-1);
+      border-radius: .5rem;
+      transition: transform .2s ease-in-out;
+      .icon__svg{
+        fill: var(--color-txt-p);
+      }
+    }
+  }
+}
