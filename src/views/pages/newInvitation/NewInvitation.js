@@ -12,6 +12,8 @@ import { Caption } from "../../commons/caption/Caption";
 import { Input } from "../../commons/Input/Input";
 import { getCollectionPath, removeOneLocal, insertOne } from "../../../data/utils";
 import { SelectInput } from "../../commons/select/SelectInput";
+import { CalendarInput } from "../../components/calendarInput/CalendarInput";
+import { dateFormatDMY } from "../../../js/utils";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -92,14 +94,18 @@ export const NewInvitation = node => {
         headers: {
             dogs: { label: "כלבים" },
             contacts: { label: "אנשי קשר" },
-            from: { label: "מתאריך" },
-            to: { label: "ועד תאריך" },
+            sDate: { label: "מתאריך" },
+            sTime: { label: "משעה", type: "time" },
+            eDate: { label: "ועד תאריך" },
+            eTime: { label: "עד שעה", type: "time" },
         },
         current: {
             dogs: [],
             contacts: [],
-            from: "",
-            to: ""
+            sDate: "",
+            eDate: "",
+            sTime: "",
+            eTime: ""
         },
         data: [],
         addNew: () => null,
@@ -122,12 +128,13 @@ export const NewInvitation = node => {
         } else {
             m.route.set("/login")
         }
-    }, 1500))
+    }, 2000))
         .then(() => m.redraw())
 
     return {
         filterListTerm: [],
         currentTab: "contacts",
+        showCalendar: false,
         view: vnode => {
             return (
                 m(PageLayout, { class: "invite" }, [
@@ -248,19 +255,32 @@ export const NewInvitation = node => {
                         ),
                         m(CardLayout, { class: "dates" },
                             m(Caption, { text: "תאריכים" }),
-                            m(Input, {
-                                model: Invitation,
+                            vnode.state.showCalendar !== false &&
+                            m(CalendarInput, {
+                                parent: vnode,
                                 doc: Invitation.current,
-                                headerKey: "from",
-                                headerObj: Invitation.headers.from
+                                inputKey: vnode.state.showCalendar.inputKey,
+                                label:vnode.state.showCalendar.label,
                             }),
-                            m(Input, { 
-                                model: Invitation,
-                                doc: Invitation.current,
-                                headerKey: "to",
-                                headerObj: Invitation.headers.to 
-                            }),
-                        ),
+                            m("label.form__row group__row", [
+                                "מתאריך :",
+                                m(".input",
+                                    m(".input__field", { onclick: e => vnode.state.showCalendar = { inputKey: "sDate" ,label:"מתאריך:" } },
+                                        Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate))
+                                    )
+                                )
+                            ]),
+                            m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime }),
+                            m("label.form__row group__row", [
+                                "עד תאריך :",
+                                m(".input",
+                                    m(".input__field", { onclick: e => vnode.state.showCalendar = { inputKey: "eDate" ,label:"עד תאריך:" } },
+                                        Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate))
+                                    )
+                                )
+                            ]),
+                            m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime }),
+                        )
                     )
                 ])
             )

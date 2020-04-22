@@ -7,6 +7,18 @@
     align-content: flex-start;
     gap: 1rem;
     white-space: nowrap;
+
+
+    // TODO: mobile view
+    // position: absolute;
+    // bottom: 0;
+    // width: 100vw;
+    // display: grid;
+    // align-items: flex-start;
+    // justify-content: center;
+    // background: var(--color-bg-dark);
+    // color: white !important;
+    
     &__tab {
         padding: 1rem;
         border-bottom: 1px solid lightgray;
