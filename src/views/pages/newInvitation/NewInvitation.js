@@ -14,7 +14,7 @@ import { getCollectionPath, removeOneLocal, insertOne } from "../../../data/util
 import { SelectInput } from "../../commons/select/SelectInput";
 import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY } from "../../../js/utils";
-import { AFTER_TODAY } from "../../components/calendarInput/options";
+import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -266,22 +266,50 @@ export const NewInvitation = node => {
                                 doc: Invitation.current,
                                 inputKey: vnode.state.showCalendar.inputKey,
                                 label: vnode.state.showCalendar.label,
-                                rules: { [AFTER_TODAY]: true }
+                                rules: vnode.state.showCalendar.rules
                             }),
                             m("label.form__row group__row", [
                                 "מתאריך :",
                                 m(".input",
-                                    m(".input__field selectDate", { onclick: e => vnode.state.showCalendar = { inputKey: "sDate", label: "מתאריך:" } },
-                                        Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate))
+                                    m(".input__field selectDate", {
+                                        onclick: e => {
+                                            vnode.state.showCalendar = {
+                                                inputKey: "sDate",
+                                                label: "מתאריך:",
+                                                rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
+                                            }
+                                        }
+                                    },
+                                        Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
+                                        Invitation.current.sDate !== "" && m(Icon, {
+                                            icon: "icon-x", action: e => {
+                                                e.stopPropagation();
+                                                Invitation.current.sDate = "";
+                                            }
+                                        })
                                     )
                                 )
                             ]),
                             m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime }),
                             m("label.form__row group__row", [
-                                "עד תאריך :",
+                                "עד תאריך :", //eDate
                                 m(".input",
-                                    m(".input__field selectDate", { onclick: e => vnode.state.showCalendar = { inputKey: "eDate", label: "עד תאריך:" } },
-                                        Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate))
+                                    m(".input__field selectDate", {
+                                        onclick: e => {
+                                            vnode.state.showCalendar = {
+                                                inputKey: "eDate",
+                                                label: "עד תאריך:",
+                                                rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
+                                            }
+                                        }
+                                    },
+                                        Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
+                                        Invitation.current.eDate !== "" && m(Icon, {
+                                            icon: "icon-x", action: e => {
+                                                e.stopPropagation();
+                                                Invitation.current.eDate = "";
+                                            }
+                                        })
                                     )
                                 )
                             ]),

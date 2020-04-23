@@ -2,7 +2,7 @@ import m from "mithril";
 import "./style.scss";
 import { Icon } from "../../commons/Icon/Icon";
 import { dateFormatDMY } from "../../../js/utils";
-import { AFTER_TODAY } from "./options";
+import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "./options";
 
 export const CalendarInput = node => {
 
@@ -34,9 +34,12 @@ export const CalendarInput = node => {
     const isDisabledDate = dateN => {
         const todayN = new Date().setHours(0, 0, 0, 0);
         let isDisabled = false;
-        //TODO: define function using custom preferences from attrs [gt date , lt date , not in day of week , not it dates]
+        //TESTME: define function using custom preferences from attrs [gt date , lt date , not in day of week , not it dates]
         if (node.attrs.rules) {
             if (node.attrs.rules[AFTER_TODAY] === true) isDisabled = dateN < todayN
+            if (node.attrs.rules[AFTER_DATE] && node.attrs.rules[AFTER_DATE] !== "") isDisabled = isDisabled || dateN < new Date(node.attrs.rules[AFTER_DATE]).setHours(0, 0, 0, 0)
+            if (node.attrs.rules[BEFORE_DATE] && node.attrs.rules[BEFORE_DATE] !== "") isDisabled = isDisabled || dateN > new Date(node.attrs.rules[BEFORE_DATE]).setHours(0, 0, 0, 0)
+            // TODO: add login to IS_DATES  and NOT_DATES
         }
         return isDisabled
     }
