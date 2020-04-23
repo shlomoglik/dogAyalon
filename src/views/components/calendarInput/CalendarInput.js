@@ -2,6 +2,7 @@ import m from "mithril";
 import "./style.scss";
 import { Icon } from "../../commons/Icon/Icon";
 import { dateFormatDMY } from "../../../js/utils";
+import { AFTER_TODAY } from "./options";
 
 export const CalendarInput = node => {
 
@@ -30,6 +31,16 @@ export const CalendarInput = node => {
         m.redraw();
     }
 
+    const isDisabledDate = dateN => {
+        const todayN = new Date().setHours(0, 0, 0, 0);
+        let isDisabled = false;
+        //TODO: define function using custom preferences from attrs [gt date , lt date , not in day of week , not it dates]
+        if (node.attrs.rules) {
+            if (node.attrs.rules[AFTER_TODAY] === true) isDisabled = dateN < todayN
+        }
+        return isDisabled
+    }
+
     return {
         month: initMonth,
         year: initYear,
@@ -44,7 +55,17 @@ export const CalendarInput = node => {
                 m(".calendar__box", { onclick: e => e.stopPropagation() },
                     m(".calendar__title", [
                         // m("span", "חודש " + vnode.state.month + " שנת " + vnode.state.year), //THINK: option 1 use curr month title
-                        m("span", vnode.attrs.label + ` ${vnode.state.selectedDate!==""?dateFormatDMY(new Date(vnode.state.selectedDate)):"--בחר--"}`),
+                        m(`span`, {
+                            class: vnode.state.selectedDate !== "" ? "calendar__title--link" : "",
+                            onclick: e => {
+                                const d = new Date(vnode.state.selectedDate);
+                                vnode.state.year = d.getFullYear();
+                                vnode.state.month = d.getMonth() + 1;
+                                updateDates()
+                            }
+                        },
+                            vnode.attrs.label + ` ${vnode.state.selectedDate !== "" ? dateFormatDMY(new Date(vnode.state.selectedDate)) : "--בחר--"}`
+                        ),
                         m(Icon, {
                             icon: "icon-calendar",
                             action: e => {
@@ -83,7 +104,7 @@ export const CalendarInput = node => {
                             value: vnode.state.year,
                             onfocus: e => e.target.oldVal = e.target.value,
                             oninput: e => {
-                                if (e.target.value.length < 4 || e.target.value.length > 4) e.target.value = e.target.oldVal
+                                if (e.target.value.length < 4 || e.target.value.length > 4) e.target.value = e.target.oldVal //THINK: maby settimeout
                                 else {
                                     vnode.state.year = e.target.value;
                                     updateDates()
@@ -110,7 +131,7 @@ export const CalendarInput = node => {
                             const dateN = date.setHours(0, 0, 0, 0);
                             const todayN = new Date().setHours(0, 0, 0, 0);
                             const isSelected = dateN === new Date(vnode.state.selectedDate).setHours(0, 0, 0, 0);
-                            const isDisabled = dateN < todayN
+                            const isDisabled = isDisabledDate(dateN)
                             const isToday = dateN === todayN
                             if (ind === 0) {
                                 const dayOfWeek = date.getDay() + 1

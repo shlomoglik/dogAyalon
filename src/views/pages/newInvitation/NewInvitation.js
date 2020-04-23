@@ -14,6 +14,7 @@ import { getCollectionPath, removeOneLocal, insertOne } from "../../../data/util
 import { SelectInput } from "../../commons/select/SelectInput";
 import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY } from "../../../js/utils";
+import { AFTER_TODAY } from "../../components/calendarInput/options";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -221,6 +222,10 @@ export const NewInvitation = node => {
                         m(".group__title", "פרטי ההזמנה:"),
                         m(CardLayout,
                             m(Caption, { text: "אנשי קשר" }),
+                            m(".row row--active",
+                                m(".row__cell", m(".checkBox", m(Icon, { icon: "icon-check" }))),
+                                m(".row__cell", Clients.data[0].clientName)
+                            ),
                             [...Contacts.data].map(doc => {
                                 const isSelected = Invitation.current.contacts.includes(doc.docID)
                                 return m(".row", {
@@ -260,12 +265,13 @@ export const NewInvitation = node => {
                                 parent: vnode,
                                 doc: Invitation.current,
                                 inputKey: vnode.state.showCalendar.inputKey,
-                                label:vnode.state.showCalendar.label,
+                                label: vnode.state.showCalendar.label,
+                                rules: { [AFTER_TODAY]: true }
                             }),
                             m("label.form__row group__row", [
                                 "מתאריך :",
                                 m(".input",
-                                    m(".input__field", { onclick: e => vnode.state.showCalendar = { inputKey: "sDate" ,label:"מתאריך:" } },
+                                    m(".input__field selectDate", { onclick: e => vnode.state.showCalendar = { inputKey: "sDate", label: "מתאריך:" } },
                                         Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate))
                                     )
                                 )
@@ -274,7 +280,7 @@ export const NewInvitation = node => {
                             m("label.form__row group__row", [
                                 "עד תאריך :",
                                 m(".input",
-                                    m(".input__field", { onclick: e => vnode.state.showCalendar = { inputKey: "eDate" ,label:"עד תאריך:" } },
+                                    m(".input__field selectDate", { onclick: e => vnode.state.showCalendar = { inputKey: "eDate", label: "עד תאריך:" } },
                                         Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate))
                                     )
                                 )

@@ -1,0 +1,1 @@
+export const AFTER_TODAY="after_today"
