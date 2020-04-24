@@ -1,16 +1,15 @@
-$dir:rtl;
-$start:right;
-$end:left;
+$dir: rtl;
+$start: right;
+$end: left;
 
-:root{
-    
+:root {
     //LANGUGE
     --dir: #{$dir};
-    --lang:'he';
-    
+    --lang: "he";
+
     // COLORS
     --color-bg-layout: #ecf0f6;
-    --color-bg-1:#d3d3d3a1;
+    --color-bg-1: #d3d3d3a1;
     --color-bg-2: #d3d3d380;
     --color-bg-3: #ecf0f661;
 
@@ -18,47 +17,44 @@ $end:left;
     --color-txt-p: #234aa9;
     --color-txt-p-light: #2349a99f;
     --color-txt-p-trs: #2349a94d;
-    --color-txt-p-dark:#333666;
+    --color-txt-p-dark: #333666;
 
-    --color-bg-dark:#333666;
-    --color-bg-md:#007dd7;
+    --color-bg-dark: #333666;
+    --color-bg-md: #007dd7;
 
-    --color-red:#eb2f64;
-    --color-red-trs:#ea2e6399;
+    --color-red: #eb2f64;
+    --color-red-trs: #ea2e6399;
 
-    --color-gray:#222;
-    --color-gray-1:#888;
+    --color-gray: #222;
+    --color-gray-1: #888;
     --color-gray-2: #d3d3d3;
-
 
     --color-white: #fff;
     --color-black: #000;
 
-
     // FONTS
     --def-font-size: 1.6rem;
-    --def-font-family: Rubik,'Tahoma',sans-serif;
+    --def-font-family: Rubik, "Tahoma", sans-serif;
     --font-family-1: var(--def-font-family);
-    --font-family-2: Alef,'Tahoma',sans-serif;
-    --font-w-1:300;
-    --font-w-2:400;
-    --font-w-3:700;
+    --font-family-2: Alef, "Tahoma", sans-serif;
+    --font-w-1: 300;
+    --font-w-2: 400;
+    --font-w-3: 700;
 
     // BLOCKS
-    --box-shadow-light: 0 1rem 2rem rgba(0,0,0,0.1);
-    --box-shadow-1: 0 1rem 2rem rgba(0,0,0,0.2);
-    --box-shadow-2: 0 .5rem 1rem rgba(0,0,0,0.4);
-    --box-shadow-3: .1rem .9rem 2rem rgba(0,0,0,0.4);
+    --box-shadow-light: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+    --box-shadow-1: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+    --box-shadow-2: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+    --box-shadow-3: 0.1rem 0.9rem 2rem rgba(0, 0, 0, 0.4);
 }
 
-
 /* GLOBAL RESET */
-*{
+* {
     padding: 0;
     margin: 0;
     &,
     &::before,
-    &::after{
+    &::after {
         font-size: 62.5%;
         box-sizing: border-box;
         @media screen and(max-width:360px) {
@@ -66,7 +62,7 @@ $end:left;
         }
     }
 }
-body{
+body {
     direction: var(--dir);
     font-family: var(--def-font-family), sans-serif;
     font-weight: var(--font-w-1);
@@ -74,23 +70,28 @@ body{
     line-height: 1.8;
     user-select: none;
 }
-.button{
+.button {
     border: none;
     outline: none;
     font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: .4rem;
+    padding: 0.4rem;
     border-radius: 1rem;
-    transition: transform .2s;
+    transition: transform 0.2s;
     cursor: pointer;
-    &--add{
+    &--add {
         background: var(--color-bg-dark);
         color: var(--color-white);
     }
-    &:hover{
+    &:hover {
         transform: scale(1.1);
         box-shadow: var(--box-shadow-light);
+    }
+    &:active {
+        opacity: .9;
+        transform: scale(1);
+        box-shadow: none;
     }
 }

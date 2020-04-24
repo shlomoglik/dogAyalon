@@ -2,14 +2,20 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background 0.2s ease-in-out;
+    &:hover {
+        background: var(--color-bg-layout);
+    }
+    &--action {
+        cursor: pointer;
+        &.icon__svg {
+            fill: var(--color-bg-md);
+        }
+    }
     &__text {
         flex: 1;
         font-size: 1.8rem;
         color: var(--color-non-active);
-        transition: background .2s ease-in-out;
-        &:hover{
-            background: var(--color-bg-layout);
-        }
     }
     .icon {
     }

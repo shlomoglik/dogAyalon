@@ -1,3 +1,7 @@
+export const dateInDays = date => parseInt(date / (1000 * 60 * 60 * 24))
+export const distDays = (d1, d2) => dateInDays(d2) - dateInDays(d1)
+
+
 export const dateFormatDMY = (date) => {
     const y = date.getFullYear();
     let m = date.getMonth(); m++;

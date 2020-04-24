@@ -13,7 +13,7 @@ import { Input } from "../../commons/Input/Input";
 import { getCollectionPath, removeOneLocal, insertOne } from "../../../data/utils";
 import { SelectInput } from "../../commons/select/SelectInput";
 import { CalendarInput } from "../../components/calendarInput/CalendarInput";
-import { dateFormatDMY } from "../../../js/utils";
+import { dateFormatDMY, distDays } from "../../../js/utils";
 import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
 
 export const NewInvitation = node => {
@@ -117,9 +117,29 @@ export const NewInvitation = node => {
         if (index === -1) {
             Invitation.current[item].push(docID)
         } else {
-            Invitation.current[item].splice(index - 1, 1)
+            Invitation.current[item].splice(index, 1)
         }
     }
+
+    const toggleCardDisplay = card => {
+        node.state.cardsDisplay[card] = !node.state.cardsDisplay[card]
+    };
+
+    const getTotalDatesStatment = () => {
+        let statement = "לא נבחרו תאריכים";
+        if (Invitation.current.sDate !== "" && Invitation.current.eDate !== "") {
+            const diff = distDays(new Date(Invitation.current.sDate), new Date(Invitation.current.eDate))
+            statement = "סהכ : " + diff + " יום";
+            if(Invitation.current.eTime !== ""){
+                const hour = parseInt(Invitation.current.eTime.split(":")[0])
+                if(hour >= 11){
+                    statement += " (יציאה אחרי 11)"
+                }
+            }
+        }
+        return statement
+    }
+
 
     Promise.resolve(setTimeout(() => {
         if (auth.currentUser !== null) {
@@ -136,6 +156,9 @@ export const NewInvitation = node => {
         filterListTerm: [],
         currentTab: "contacts",
         showCalendar: false,
+        cardsDisplay: {
+            "dates": true
+        },
         view: vnode => {
             return (
                 m(PageLayout, { class: "invite" }, [
@@ -218,7 +241,7 @@ export const NewInvitation = node => {
                     ]),
 
                     vnode.state.currentTab === "invitation" &&
-                    m(".group group--dogs",
+                    m(".group group--invitation",
                         m(".group__title", "פרטי ההזמנה:"),
                         m(CardLayout,
                             m(Caption, { text: "אנשי קשר" }),
@@ -259,7 +282,11 @@ export const NewInvitation = node => {
                             })
                         ),
                         m(CardLayout, { class: "dates" },
-                            m(Caption, { text: "תאריכים" }),
+                            m(Caption, {
+                                text: "תאריכים",
+                                action: e => toggleCardDisplay("dates"),
+                                icon: vnode.state.cardsDisplay.dates === true ? false : "icon-chevron-thin-up"
+                            }),
                             vnode.state.showCalendar !== false &&
                             m(CalendarInput, {
                                 parent: vnode,
@@ -268,53 +295,62 @@ export const NewInvitation = node => {
                                 label: vnode.state.showCalendar.label,
                                 rules: vnode.state.showCalendar.rules
                             }),
-                            m("label.form__row group__row", [
-                                "מתאריך :",
-                                m(".input",
-                                    m(".input__field selectDate", {
-                                        onclick: e => {
-                                            vnode.state.showCalendar = {
-                                                inputKey: "sDate",
-                                                label: "מתאריך:",
-                                                rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
+
+                            vnode.state.cardsDisplay.dates && [
+                                m("label.form__row group__row", [
+                                    "מתאריך :",
+                                    m(".input",
+                                        m(".input__field selectDate", {
+                                            onclick: e => {
+                                                vnode.state.showCalendar = {
+                                                    inputKey: "sDate",
+                                                    label: "מתאריך:",
+                                                    rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
+                                                }
                                             }
-                                        }
-                                    },
-                                        Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
-                                        Invitation.current.sDate !== "" && m(Icon, {
-                                            icon: "icon-x", action: e => {
-                                                e.stopPropagation();
-                                                Invitation.current.sDate = "";
-                                            }
-                                        })
+                                        },
+                                            Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
+                                            Invitation.current.sDate !== "" && m(Icon, {
+                                                icon: "icon-x", action: e => {
+                                                    e.stopPropagation();
+                                                    Invitation.current.sDate = "";
+                                                }
+                                            })
+                                        )
                                     )
-                                )
-                            ]),
-                            m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime }),
-                            m("label.form__row group__row", [
-                                "עד תאריך :", //eDate
-                                m(".input",
-                                    m(".input__field selectDate", {
-                                        onclick: e => {
-                                            vnode.state.showCalendar = {
-                                                inputKey: "eDate",
-                                                label: "עד תאריך:",
-                                                rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
+                                ]),
+                                m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime }),
+                                m("label.form__row group__row", [
+                                    "עד תאריך :", //eDate
+                                    m(".input",
+                                        m(".input__field selectDate", {
+                                            onclick: e => {
+                                                vnode.state.showCalendar = {
+                                                    inputKey: "eDate",
+                                                    label: "עד תאריך:",
+                                                    rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
+                                                }
                                             }
-                                        }
-                                    },
-                                        Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
-                                        Invitation.current.eDate !== "" && m(Icon, {
-                                            icon: "icon-x", action: e => {
-                                                e.stopPropagation();
-                                                Invitation.current.eDate = "";
-                                            }
-                                        })
+                                        },
+                                            Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
+                                            Invitation.current.eDate !== "" && m(Icon, {
+                                                icon: "icon-x", action: e => {
+                                                    e.stopPropagation();
+                                                    Invitation.current.eDate = "";
+                                                }
+                                            })
+                                        )
                                     )
-                                )
-                            ]),
-                            m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime }),
-                        )
+                                ]),
+                                m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime }),
+
+                            ],
+
+                            m(".total",
+                                m(".total__text", getTotalDatesStatment()),
+                            )
+                        ),
+                        m("button.button send", "שלח הזמנה")
                     )
                 ])
             )
