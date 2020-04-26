@@ -13,8 +13,11 @@
                 - dogDOB:Date
         - Invitations
             - {invite}
-                - dogRef:string
-                - sDate:Date
-                - eDate:Date
+                - dogs:[docRef:string]
+                - contacts:[contactRef:string]
+                - sDate:string
+                - eDate:string
+                - sTime:string
+                - eTime:string
 
         

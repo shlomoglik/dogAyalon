@@ -109,7 +109,17 @@ export const NewInvitation = node => {
             eTime: ""
         },
         data: [],
-        addNew: () => null,
+        addNew: () => {
+            Invitation.current = {
+                dogs: [],
+                contacts: [],
+                sDate: "",
+                eDate: "",
+                sTime: "",
+                eTime: ""
+            };
+            node.state.displayInvitation = "new"
+        },
     }
 
     const toggleSelectInvitation = (item, docID) => {
@@ -129,10 +139,10 @@ export const NewInvitation = node => {
         let statement = "לא נבחרו תאריכים";
         if (Invitation.current.sDate !== "" && Invitation.current.eDate !== "") {
             const diff = distDays(new Date(Invitation.current.sDate), new Date(Invitation.current.eDate))
-            statement = "סהכ : " + diff + " יום";
-            if(Invitation.current.eTime !== ""){
+            statement = "משך : " + diff + " יום";
+            if (Invitation.current.eTime !== "") {
                 const hour = parseInt(Invitation.current.eTime.split(":")[0])
-                if(hour >= 11){
+                if (hour >= 11) {
                     statement += " (יציאה אחרי 11)"
                 }
             }
@@ -140,12 +150,31 @@ export const NewInvitation = node => {
         return statement
     }
 
+    const isValidInvitaion = param => {
+        const validDates = Invitation.current.sDate !== "" && Invitation.current.eDate !== ""
+        const validDogs = Invitation.current.dogs.length > 0
+        const validTerms = true
+        if (param && param === "dates") return validDates
+        if (param && param === "dogs") return validDogs
+        if (param && param === "terms") return validTerms
+        return validDates && validDogs && validTerms
+    }
+
+    const sendInvitation = () => {
+        try {
+            Promise.resolve(insertOne(Invitation, Object.assign({ status: "new" }, Invitation.current)))
+                .then(() => node.state.displayInvitation = "all")
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     Promise.resolve(setTimeout(() => {
         if (auth.currentUser !== null) {
             docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
             queryListener(Contacts.data, db.collection(`clients/${auth.currentUser.uid}/contacts`));
             queryListener(Dogs.data, db.collection(`clients/${auth.currentUser.uid}/dogs`));
+            queryListener(Invitation.data, db.collection(`clients/${auth.currentUser.uid}/invitations`));
         } else {
             m.route.set("/login")
         }
@@ -155,6 +184,7 @@ export const NewInvitation = node => {
     return {
         filterListTerm: [],
         currentTab: "contacts",
+        displayInvitation: "all",
         showCalendar: false,
         cardsDisplay: {
             "dates": true
@@ -168,7 +198,7 @@ export const NewInvitation = node => {
                         tabObj: {
                             contacts: { label: "פרטי קשר", icon: "icon-users" },
                             dogs: { label: "כלבים", icon: "icon-dog" },
-                            invitation: { label: "פרטי הזמנה", icon: "icon-calendar" }
+                            invitation: { label: "הזמנות", icon: "icon-calendar" }
                         }
                     }),
 
@@ -240,9 +270,33 @@ export const NewInvitation = node => {
                         m(CardLayout, { class: "addNew" }, m(".", { onclick: e => Dogs.addNew() }, "+ הוסף כלב"))
                     ]),
 
-                    vnode.state.currentTab === "invitation" &&
+                    (vnode.state.currentTab === "invitation" && vnode.state.displayInvitation === "all") &&
                     m(".group group--invitation",
-                        m(".group__title", "פרטי ההזמנה:"),
+                        m(".group__title", "ההזמנות שלי:"),
+                        Invitation.data.map(doc => {
+                            return m(CardLayout,
+                                m(".", doc.docID),
+                                doc.contacts.map(contactRef => {
+                                    const contact = Contacts.data.find(doc => doc.docID === contactRef)
+                                    return m(".", contact.contactName)
+                                }),
+                                doc.dogs.map(dogRef => {
+                                    const dog = Dogs.data.find(doc => doc.docID === dogRef)
+                                    return m(".", dog.dogName)
+                                }),
+                                m(".", doc.sDate),
+                                m(".", doc.eDate),
+                            )
+                        }),
+                        m(CardLayout, { class: "addNew" }, m(".", { onclick: e => Invitation.addNew() }, "+ הוסף הזמנה"))
+                    ),
+
+                    (vnode.state.currentTab === "invitation" && vnode.state.displayInvitation === "new") &&
+                    m(".group group--invitation",
+                        m(".group__title", [
+                            m(Icon, { icon: "icon-arrow-right",class:"icon--right", action: e => vnode.state.displayInvitation = "all" }),
+                            "פרטי ההזמנה:",
+                        ]),
                         m(CardLayout,
                             m(Caption, { text: "אנשי קשר" }),
                             m(".row row--active",
@@ -274,6 +328,7 @@ export const NewInvitation = node => {
                                 },
                                     m(".row__cell",
                                         m(".checkBox",
+                                            { class: isSelected ? "" : "checkBox--invalid" },
                                             isSelected && m(Icon, { icon: "icon-check" })
                                         )
                                     ),
@@ -298,9 +353,10 @@ export const NewInvitation = node => {
 
                             vnode.state.cardsDisplay.dates && [
                                 m("label.form__row group__row", [
-                                    "מתאריך :",
+                                    "מתאריך:",
                                     m(".input",
                                         m(".input__field selectDate", {
+                                            class: Invitation.current.sDate === "" ? "selectDate--invalid" : "",
                                             onclick: e => {
                                                 vnode.state.showCalendar = {
                                                     inputKey: "sDate",
@@ -321,9 +377,10 @@ export const NewInvitation = node => {
                                 ]),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime }),
                                 m("label.form__row group__row", [
-                                    "עד תאריך :", //eDate
+                                    "עד תאריך:", //eDate
                                     m(".input",
                                         m(".input__field selectDate", {
+                                            class: Invitation.current.eDate === "" ? "selectDate--invalid" : "",
                                             onclick: e => {
                                                 vnode.state.showCalendar = {
                                                     inputKey: "eDate",
@@ -343,14 +400,12 @@ export const NewInvitation = node => {
                                     )
                                 ]),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime }),
-
                             ],
-
-                            m(".total",
-                                m(".total__text", getTotalDatesStatment()),
-                            )
                         ),
-                        m("button.button send", "שלח הזמנה")
+                        // m(".total", { class: isValidInvitaion("dates") ? "" : "total--invalid" },
+                        //     m(".total__text", getTotalDatesStatment()),
+                        // ),
+                        isValidInvitaion() && m("button.button send", { onclick: e => sendInvitation() }, "שלח הזמנה")
                     )
                 ])
             )

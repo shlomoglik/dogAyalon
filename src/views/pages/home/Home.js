@@ -13,15 +13,26 @@ export const Home = node => {
         { src: "/img/dogBg.jpg" }
     ]
     return {
+        isLoggedIn: false,
+        isLoading: true,
+        oninit: vnode => {
+            vnode.state.isLoading = true
+            setTimeout(() => {
+                auth.currentUser === null ? vnode.state.isLoggedIn = false : vnode.state.isLoggedIn = true;
+                vnode.state.isLoading = false
+                m.redraw()
+            }, 2000);
+        },
         view: vnode => {
             return (
                 m(PageLayout, { class: "home" }, [
                     m(CardLayout, { class: "welcome" },
                         m(".welcome__title", "ברוכים הבאים לפנסיון הכלבים של חוות עמק איילון"),
-                        auth.currentUser === null ?
-                            m(".welcome__login-link", { onclick: e => m.route.set("/login") }, "להתחברות לחץ כאן")
-                            :
-                            m(".welcome__login-link", { onclick: e => m.route.set("/app/invite") }, "להזמנת מקום לפנסיון")
+                        vnode.state.isLoading ? null :
+                            vnode.state.isLoggedIn ?
+                                m(".welcome__login-link", { onclick: e => m.route.set("/app/invite") }, "להזמנת מקום לפנסיון")
+                                :
+                                m(".welcome__login-link", { onclick: e => m.route.set("/login") }, "להתחברות לחץ כאן")
                     ),
                     m(CardLayout, { class: "photos" },
                         images.map(img => m("img", { src: img.src })),
