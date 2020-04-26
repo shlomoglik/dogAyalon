@@ -15,6 +15,7 @@ import { SelectInput } from "../../commons/select/SelectInput";
 import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY, distDays } from "../../../js/utils";
 import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
+import { FileUpload } from "../../commons/fileUpload/FileUpload";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -240,6 +241,7 @@ export const NewInvitation = node => {
                         m(".group__title", "כלבים:"),
                         [...Dogs.data].map((doc, index) => {
                             return m(CardLayout, [
+                                m(FileUpload),
                                 Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
                                     switch (true) {
                                         case headerObj.type === inputTypes.SELECT:

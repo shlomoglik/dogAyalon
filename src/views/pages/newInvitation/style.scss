@@ -63,7 +63,7 @@
           fill: var(--color-txt-p);
         }
       }
-      .icon--right{
+      .icon--right {
         right: 0;
       }
     }
@@ -98,7 +98,7 @@
       border: 1px solid var(--color-bg-1);
       border-radius: 0.5rem;
       transition: transform 0.2s ease-in-out;
-      &--invalid{
+      &--invalid {
         border-color: var(--color-red);
       }
       .icon__svg {
@@ -108,24 +108,24 @@
   }
 }
 
-.total{
+.total {
   border: 3px solid #007dd72b;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-bg-md);
-  &--invalid{
+  &--invalid {
     color: var(--color-red);
     border-color: var(--color-red);
   }
-  &__text{
+  &__text {
     font-size: 1.8rem;
     font-weight: 600;
     background-color: var(--color-bg-3);
   }
 }
 
-.send{
+.send {
   color: var(--color-white);
   background-color: var(--color-bg-md);
   justify-self: center;
@@ -138,7 +138,7 @@
   position: relative;
   color: var(--color-non-active);
   cursor: pointer;
-  &--invalid{
+  &--invalid {
     color: var(--color-red);
   }
   .icon {

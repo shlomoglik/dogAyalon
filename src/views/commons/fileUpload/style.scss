@@ -1,0 +1,45 @@
+.file{
+    align-self: center;
+    justify-self: center;
+    cursor: pointer;
+    .icon{
+        border-radius: 1.5rem;
+        background-color: var(--color-bg-2);
+        padding: 1rem;
+        width: 6rem;
+        height: 6rem;
+        transition: transform .2s ease-in-out;
+        &:hover{
+            transform: scale(1.1);
+        }
+        &:active{
+            transform: scale(1);
+        }
+        &__svg{
+            fill: var(--color-txt-p-light);
+            width: 6rem;
+            height: 6rem;
+        }
+    }
+    img.icon{
+        background-color: none;
+    }
+    .showImg {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 100;
+        display: grid;
+        justify-content: center;
+        align-items: center;
+        &__box{
+            border-radius: 2rem;
+            padding: 2rem;
+            background-color: var(--color-white);
+        }
+      }
+}
+  
