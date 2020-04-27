@@ -16,13 +16,15 @@ import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY, distDays } from "../../../js/utils";
 import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
 import { FileUpload } from "../../commons/fileUpload/FileUpload";
+import { invitationStatus } from "../../../data/settings";
 
 export const NewInvitation = node => {
     const inputTypes = {
         TEXT: "text",
         SELECT: "select",
         LIST: "list",
-        NUMBER: "number"
+        NUMBER: "number",
+        HIDDEN: "hidden"
     }
 
     const breeds = {
@@ -38,7 +40,8 @@ export const NewInvitation = node => {
             dogName: { label: "שם הכלב", type: inputTypes.TEXT },
             dogGender: { label: "מין", type: inputTypes.SELECT, options: { male: "זכר", female: "נקבה", maleB: "זכר - מסורס", femaleB: "נקבה - מעוקרת" } },
             dogBreed: { label: "גזע", type: inputTypes.SELECT, options: breeds },
-            age: { label: "גיל", type: inputTypes.NUMBER, parseInput: "numToDate", parseValue: "dateToNum" },
+            dogPhoto: { label: "תמונה", type: "hidden" },
+            age: { label: "גיל", type: inputTypes.NUMBER },
         },
         data: [],
         new: [],
@@ -219,7 +222,6 @@ export const NewInvitation = node => {
                                 Object.entries(Contacts.headers).map(([headerKey, headerObj]) => {
                                     return m(Input, { model: Contacts, doc: contact, headerKey, headerObj })
                                 })
-
                             ])
                         }),
                         [...Contacts.new].map((doc, index) => {
@@ -241,11 +243,12 @@ export const NewInvitation = node => {
                         m(".group__title", "כלבים:"),
                         [...Dogs.data].map((doc, index) => {
                             return m(CardLayout, [
-                                m(FileUpload),
+                                m(FileUpload, { path: `${getCollectionPath(Dogs.meta.routes.collection)}/${doc.docID}`, inputKey: "dogPhoto", value: doc.dogPhoto || "" }),
                                 Object.entries(Dogs.headers).map(([headerKey, headerObj], ind) => {
                                     switch (true) {
                                         case headerObj.type === inputTypes.SELECT:
                                             return m(SelectInput, { model: Dogs, doc, index, headerKey, headerObj })
+                                        case headerObj.type === inputTypes.HIDDEN: return null
                                         default:
                                             return m(Input, { model: Dogs, doc, headerKey, headerObj })
                                     }
@@ -259,6 +262,7 @@ export const NewInvitation = node => {
                                     switch (true) {
                                         case headerObj.type === inputTypes.SELECT:
                                             return m(SelectInput, { doc, index, headerKey, headerObj, isNew: true })
+                                        case headerObj.type === inputTypes.HIDDEN: return null
                                         default:
                                             return m(Input, { model: Dogs, doc, headerKey, headerObj, isNew: true })
                                     }
@@ -276,18 +280,28 @@ export const NewInvitation = node => {
                     m(".group group--invitation",
                         m(".group__title", "ההזמנות שלי:"),
                         Invitation.data.map(doc => {
+                            console.log(doc)
+                            const sDate = new Date(doc.sDate)
+                            const eDate = new Date(doc.eDate)
                             return m(CardLayout,
-                                m(".", doc.docID),
-                                doc.contacts.map(contactRef => {
-                                    const contact = Contacts.data.find(doc => doc.docID === contactRef)
-                                    return m(".", contact.contactName)
-                                }),
-                                doc.dogs.map(dogRef => {
-                                    const dog = Dogs.data.find(doc => doc.docID === dogRef)
-                                    return m(".", dog.dogName)
-                                }),
-                                m(".", doc.sDate),
-                                m(".", doc.eDate),
+                                m(".invitation__dogs",
+                                    doc.dogs.map(dogRef => {
+                                        const dog = Dogs.data.find(doc => doc.docID === dogRef)
+                                        return m(".invitation__dog", dog.dogName)
+                                    }),
+                                ),
+                                m(".invitation__dates",
+                                    m(".invitation__date",
+                                        m("span", dateFormatDMY(sDate)),
+                                        m("span", sDate.getDay())
+                                    ),
+                                    m(Icon, { icon: "icon-arrow-left" }),
+                                    m(".invitation__date",
+                                        m("span",dateFormatDMY(eDate)),
+                                        m("span",eDate.getDay()),
+                                    ),
+                                ),
+                                m(".invitation__status", doc.status),
                             )
                         }),
                         m(CardLayout, { class: "addNew" }, m(".", { onclick: e => Invitation.addNew() }, "+ הוסף הזמנה"))
@@ -296,7 +310,7 @@ export const NewInvitation = node => {
                     (vnode.state.currentTab === "invitation" && vnode.state.displayInvitation === "new") &&
                     m(".group group--invitation",
                         m(".group__title", [
-                            m(Icon, { icon: "icon-arrow-right",class:"icon--right", action: e => vnode.state.displayInvitation = "all" }),
+                            m(Icon, { icon: "icon-arrow-right", class: "icon--right", action: e => vnode.state.displayInvitation = "all" }),
                             "פרטי ההזמנה:",
                         ]),
                         m(CardLayout,

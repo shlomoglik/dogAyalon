@@ -1,30 +1,30 @@
-.file{
+.file {
     align-self: center;
     justify-self: center;
-    cursor: pointer;
-    .icon{
+    &__thumb {
+        cursor: pointer;
         border-radius: 1.5rem;
-        background-color: var(--color-bg-2);
         padding: 1rem;
-        width: 6rem;
-        height: 6rem;
-        transition: transform .2s ease-in-out;
-        &:hover{
+        height: 7rem;
+        transition: transform 0.2s ease-in-out;
+        &:hover {
             transform: scale(1.1);
         }
-        &:active{
+        &:active {
             transform: scale(1);
         }
-        &__svg{
+        .icon__svg {
             fill: var(--color-txt-p-light);
             width: 6rem;
             height: 6rem;
         }
     }
-    img.icon{
-        background-color: none;
+    &__thumb.icon {
+        background-color: var(--color-bg-2);
+        width: 7rem;
     }
     .showImg {
+        cursor: pointer;
         position: fixed;
         left: 0;
         top: 0;
@@ -35,11 +35,84 @@
         display: grid;
         justify-content: center;
         align-items: center;
-        &__box{
+        grid-auto-flow: column;
+        &__box {
+            cursor: context-menu;
             border-radius: 2rem;
             padding: 2rem;
             background-color: var(--color-white);
+            display: grid;
+            gap: 2rem;
         }
-      }
+        &__noImage {
+            width: 30rem;
+            height: 30rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-bg-2);
+            border-radius: 0.5rem;
+            font-size: 2.4rem;
+            color: var(--color-txt-p-trs);
+            cursor: pointer;
+        }
+        &__noImage.droparea {
+            border: 5px dotted lightgray;
+            color: var(--color-txt-p);
+        }
+        &__noImage.hover {
+            color: var(--color-txt-p);
+        }
+        &__img {
+            position: relative;
+        }
+        &__remove {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--color-red);
+            color: white;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            transition: transform 0.2s ease-in-out;
+            &:hover {
+                transform: scale(1.2);
+            }
+            &:active {
+                transform: scale(1);
+            }
+            .icon__svg {
+                fill: currentColor;
+            }
+        }
+        &__save {
+            background-color: var(--color-bg-md);
+            color: var(--color-white);
+            font-size: 2rem;
+            transition: transform 0.2s ease-in-out;
+            padding: 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            border: none;
+            &:hover {
+                transform: scale(1.1);
+            }
+            &:active {
+                transform: scale(1);
+            }
+            &__text {
+                flex: 1;
+            }
+            .icon {
+                &__svg {
+                    fill: var(--color-white);
+                }
+            }
+        }
+    }
 }
-  
