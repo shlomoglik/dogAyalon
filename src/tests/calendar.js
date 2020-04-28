@@ -53,3 +53,31 @@
 //     d++;
 // }
 // console.log(dates)
+
+
+// const daysOfWeek = [
+//     {
+//         label: "ראשון"
+//     },
+//     {
+//         label: "שני"
+//     },
+//     {
+//         label: "שלישי"
+//     },
+//     {
+//         label: "רביעי"
+//     },
+//     {
+//         label: "חמישי"
+//     },
+//     {
+//         label: "שישי"
+//     },
+//     {
+//         label: "שבת"
+//     },
+// ]
+// const today = new Date()
+// const day = today.getDay()
+// console.log(daysOfWeek[day-1].label)

@@ -4,6 +4,6 @@ import "./style.scss"
 
 export const CardLayout = node => {
     return {
-        view: vnode => m(".card", { class: vnode.attrs.class }, vnode.children)
+        view: vnode => m(".card fade-in", { class: vnode.attrs.class }, vnode.children)
     }
 }

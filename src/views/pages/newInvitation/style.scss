@@ -3,6 +3,11 @@
   &__title {
     font-size: 3rem;
   }
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
 
   .button__text {
     font-size: 1.8rem;
@@ -161,28 +166,111 @@
 }
 
 .invitation {
+  gap: 2rem;
+  grid-template-columns: 1fr max-content;
+  grid-template-rows: min-content 1fr;
   &__dogs {
     display: flex;
     align-items: center;
     justify-content: center;
   }
   &__dog {
-    font-size: 1.4rem;
-    background: var(--color-bg-2);
-    border-radius: 1rem;
-    padding: 1rem;
     &:not(:last-child) {
       margin-left: 1rem;
     }
+    &-caption {
+      font-size: 1.4rem;
+      color: var(--color-non-active);
+    }
   }
-  &__dates{
+  &__dates {
     display: flex;
     align-items: center;
     justify-content: center;
   }
   &__date {
-    font-size: 1.4rem;
     margin: 1rem;
-    font-weight: 500;
+    display: grid;
+    border: 1px solid #a2a2c454;
+    &-text {
+      padding: 0.5rem;
+      font-size: 1.4rem;
+      font-weight: 500;
+    }
+    &-day {
+      padding: 0.2rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+  }
+  &__arrow {
+    display: grid;
+  }
+  &__totalDays {
+    font-size: 1.4rem;
+    color: var(--color-non-active);
+    font-weight: 600;
+  }
+  &__status {
+    padding: 0.5rem;
+    justify-self: end;
+    grid-row: 1 /-1;
+    grid-column: 2;
+    align-self: center;
+    width: 7rem;
+    height: 100%;
+    border: 1px solid #d3d3d382;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2rem 0 0 2rem;
+    &-text {
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.filters {
+  display: grid;
+  &__row {
+    display: flex;
+    flex-flow: wrap;
+  }
+  &__status {
+    padding: 1rem;
+    background-color: white;
+    color: var(--color-txt-p);
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 400;
+    position: relative;
+    cursor: pointer;
+    transition: all .4s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+    .counter {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0.5rem;
+      font-size: 1.4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      transform: translateY(-50%);
+      background-color: #eb2f64;
+      color: white;
+    }
+    &--active {
+      background-color: var(--color-txt-p);
+      color: white;
+      & .counter{
+        background-color: var(--color-bg-md);
+      }
+    }
   }
 }

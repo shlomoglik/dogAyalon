@@ -16,7 +16,7 @@ import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY, distDays } from "../../../js/utils";
 import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
 import { FileUpload } from "../../commons/fileUpload/FileUpload";
-import { invitationStatus } from "../../../data/settings";
+import { invitationStatus, daysOfWeek } from "../../../data/settings";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -154,6 +154,24 @@ export const NewInvitation = node => {
         return statement
     }
 
+    const isActiveFilter = (filterType, param) => node.state.filterList[filterType].includes(param)
+    const hasFilters = filterType => node.state.filterList[filterType].length > 0
+    const toggleActiveFilter = (filterType, param) => {
+        const findIndex = node.state.filterList[filterType].indexOf(param)
+        if (findIndex > -1) {//remove
+            node.state.filterList[filterType].splice(findIndex, 1)
+        } else {//add
+            node.state.filterList[filterType].push(param)
+        }
+    }
+
+    const countStatus = (param) => {
+        const filter = Invitation.data.filter(doc => doc.status === param)
+        if (filter.length > 0) {
+            return filter.length
+        }
+    }
+
     const isValidInvitaion = param => {
         const validDates = Invitation.current.sDate !== "" && Invitation.current.eDate !== ""
         const validDogs = Invitation.current.dogs.length > 0
@@ -173,6 +191,14 @@ export const NewInvitation = node => {
         }
     }
 
+    const hideAnimation = (vnode,animationName) => {
+        
+        vnode.dom.classList.remove("fade-in")
+        vnode.dom.classList.add("fade-out")
+        return new Promise(resolve=>vnode.dom.addEventListener("animationend", resolve))
+    }
+
+
     Promise.resolve(setTimeout(() => {
         if (auth.currentUser !== null) {
             docListener("clients", `clients/${auth.currentUser.uid}`, Clients.data);
@@ -187,6 +213,9 @@ export const NewInvitation = node => {
 
     return {
         filterListTerm: [],
+        filterList: {
+            status: [invitationStatus.NEW, invitationStatus.UPDATE_SENT, invitationStatus.CONFIRM, invitationStatus.REJECT]
+        },
         currentTab: "contacts",
         displayInvitation: "all",
         showCalendar: false,
@@ -279,29 +308,60 @@ export const NewInvitation = node => {
                     (vnode.state.currentTab === "invitation" && vnode.state.displayInvitation === "all") &&
                     m(".group group--invitation",
                         m(".group__title", "ההזמנות שלי:"),
-                        Invitation.data.map(doc => {
-                            console.log(doc)
+                        m(".filters", [
+                            m(".filters__row",
+                                [invitationStatus.NEW, invitationStatus.UPDATE_SENT, invitationStatus.CONFIRM, invitationStatus.REJECT, invitationStatus.ACTIVE, invitationStatus.DONE]
+                                    .map(statusKey => {
+                                        const count = countStatus(statusKey)
+                                        if (!count) return null
+                                        return m(".filters__status", {
+                                            onclick: e => toggleActiveFilter("status", statusKey),
+                                            class: isActiveFilter("status", statusKey) ? "filters__status--active" : "",
+                                        }, invitationStatus[statusKey].label, m("span.counter", countStatus(statusKey)))
+                                    }),
+                            ),
+                            m(".filters__row"
+
+                            ),
+                            m(".filters__row"
+
+                            ),
+                        ]),
+                        Invitation.data.sort().map(doc => {
                             const sDate = new Date(doc.sDate)
                             const eDate = new Date(doc.eDate)
-                            return m(CardLayout,
+                            const statusObj = invitationStatus[doc.status];
+                            if (hasFilters("status") && !isActiveFilter("status", doc.status)) {
+                                return null
+                            }
+                            return m(CardLayout, { onbeforeremove: elem => hideAnimation(elem), class: "invitation" },
                                 m(".invitation__dogs",
                                     doc.dogs.map(dogRef => {
                                         const dog = Dogs.data.find(doc => doc.docID === dogRef)
-                                        return m(".invitation__dog", dog.dogName)
+                                        return m(".invitation__dog",
+                                            m(FileUpload, { path: `${getCollectionPath(Dogs.meta.routes.collection)}/${dog.docID}`, inputKey: "dogPhoto", value: dog.dogPhoto || "" }),
+                                            m(".invitation__dog-caption", dog.dogName)
+                                        )
                                     }),
+                                ),
+                                doc.status && m(".invitation__status",
+                                    m(".invitation__status-text", { style: { color: statusObj.color } }, statusObj.label),
+                                    // m(Icon, { icon: "icon-chevron-thin-down" })
                                 ),
                                 m(".invitation__dates",
                                     m(".invitation__date",
-                                        m("span", dateFormatDMY(sDate)),
-                                        m("span", sDate.getDay())
+                                        m("span.invitation__date-text", dateFormatDMY(sDate)),
+                                        m("span.invitation__date-day", daysOfWeek[sDate.getDay() - 1].label)
                                     ),
-                                    m(Icon, { icon: "icon-arrow-left" }),
+                                    m(".invitation__arrow",
+                                        m(Icon, { icon: "icon-arrow-left" }),
+                                        m(".invitation__totalDays", `${distDays(sDate, eDate)} יום`)
+                                    ),
                                     m(".invitation__date",
-                                        m("span",dateFormatDMY(eDate)),
-                                        m("span",eDate.getDay()),
+                                        m("span.invitation__date-text", dateFormatDMY(eDate)),
+                                        m("span.invitation__date-day", daysOfWeek[eDate.getDay() - 1].label),
                                     ),
                                 ),
-                                m(".invitation__status", doc.status),
                             )
                         }),
                         m(CardLayout, { class: "addNew" }, m(".", { onclick: e => Invitation.addNew() }, "+ הוסף הזמנה"))
