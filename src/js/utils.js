@@ -12,3 +12,12 @@ export const dateFormatDMY = (date) => {
     const output = d + "/" + m + "/" + y;
     return output;
 }
+
+export function isArrayEquals(a1, a2) {
+    let isEq = true
+    if (a1.length != a2.length) return false
+    a1.forEach(el => {
+        if (!a2.includes(el)) isEq = isEq && false
+    });
+    return isEq
+}

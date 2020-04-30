@@ -60,12 +60,13 @@
         border-radius: 3rem;
         cursor: pointer;
         transition: transform 0.2s;
+        color: var(--color-non-active) ;
         &:hover {
           transform: scale(1.1);
           box-shadow: var(--box-shadow-light);
         }
-        &__svg {
-          fill: var(--color-txt-p);
+        &--action{
+          color: var(--color-txt-p);
         }
       }
       .icon--right {
@@ -169,12 +170,28 @@
   gap: 2rem;
   grid-template-columns: 1fr max-content;
   grid-template-rows: min-content 1fr;
+  & > .icon{
+    grid-row: 1;
+    cursor: pointer;
+    border-radius: 50%;
+    &:hover{
+      background-color: var(--color-bg-2);
+    }
+  }
   &__dogs {
+    grid-row: 2;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   &__dog {
+    &--added{
+      border: 2px solid blue;
+    }
+    &--removed{
+      border: 2px solid red;
+      opacity: .6;
+    }
     &:not(:last-child) {
       margin-left: 1rem;
     }
@@ -182,8 +199,12 @@
       font-size: 1.4rem;
       color: var(--color-non-active);
     }
+    &--removed &-caption{
+      text-decoration: line-through;
+    }
   }
   &__dates {
+    grid-row: 3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,6 +213,9 @@
     margin: 1rem;
     display: grid;
     border: 1px solid #a2a2c454;
+    &--update{
+      border: 1px solid blue;
+    }
     &-text {
       padding: 0.5rem;
       font-size: 1.4rem;
@@ -202,19 +226,24 @@
       font-size: 1.2rem;
       font-weight: 500;
     }
+    &-time{
+      padding: 0.1rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
   }
   &__arrow {
     display: grid;
+    color: var(--color-non-active);
   }
   &__totalDays {
     font-size: 1.4rem;
-    color: var(--color-non-active);
     font-weight: 600;
   }
   &__status {
     padding: 0.5rem;
     justify-self: end;
-    grid-row: 1 /-1;
+    grid-row: 1 / 4;
     grid-column: 2;
     align-self: center;
     width: 7rem;
@@ -234,9 +263,18 @@
 
 .filters {
   display: grid;
+  background-color: var(--color-bg-2);
+  padding: 1rem;
   &__row {
     display: flex;
     flex-flow: wrap;
+    align-items: center;
+  }
+  &__caption{
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-txt-p);
+    margin-left: 1.5rem;
   }
   &__status {
     padding: 1rem;

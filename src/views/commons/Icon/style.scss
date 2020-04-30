@@ -5,15 +5,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  color: var(--color-non-active);
   &__svg {
     width: 2rem;
     height: 2rem;
-    fill: var(--color-non-active);
+    fill: currentColor;
   }
   &--action{
-    background-color: lightgray;
+    background-color: var(--color-bg-2);
     border-radius: 3rem;
     cursor: pointer;
     transition: transform 0.2s;
+    color: var(--color-txt-p);
   }
 }

@@ -17,25 +17,11 @@ export const invitationStatus = {
 }
 
 export const daysOfWeek = [
-    {
-        label: "ראשון"
-    },
-    {
-        label: "שני"
-    },
-    {
-        label: "שלישי"
-    },
-    {
-        label: "רביעי"
-    },
-    {
-        label: "חמישי"
-    },
-    {
-        label: "שישי"
-    },
-    {
-        label: "שבת"
-    },
+    { label: "ראשון" },
+    { label: "שני" },
+    { label: "שלישי" },
+    { label: "רביעי" },
+    { label: "חמישי" },
+    { label: "שישי" },
+    { label: "שבת" },
 ]
