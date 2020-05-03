@@ -3,11 +3,11 @@
   &__title {
     font-size: 3rem;
   }
-  .tabs {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
+  // .tabs {
+  //   position: sticky;
+  //   top: 0;
+  //   z-index: 1000;
+  // }
 
   .button__text {
     font-size: 1.8rem;
@@ -306,9 +306,9 @@
     &--active {
       background-color: var(--color-txt-p);
       color: white;
-      & .counter{
-        background-color: var(--color-bg-md);
-      }
+      // & .counter{
+      //   background-color: var(--color-bg-md);
+      // }
     }
   }
 }

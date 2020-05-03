@@ -1,3 +1,5 @@
+<!-- TOOD: login + sign in + remove invitation + admin panel!!!-->
+
 # DB map 
 - Clients (clients<->users)
     - {client}

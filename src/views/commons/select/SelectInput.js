@@ -46,7 +46,7 @@ export const SelectInput = node => {
                                 id: key,
                                 onclick: e => {
                                     doc[headerKey] = key;
-                                    saveOne(vnode.attrs.model, { [headerKey]: key }, doc.docID) // save data
+                                    vnode.attrs.isNew ? null : saveOne(vnode.attrs.model, { [headerKey]: key }, doc.docID) // save data
                                     toggleSearch()
                                 }
                             }, value)

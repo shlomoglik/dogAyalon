@@ -38,6 +38,9 @@
         background-color: var(--color-txt-p-light);
         opacity: 1;
     }
+    &__label{
+        font-size: 1.4rem;
+    }
     &__field {
         border: none;
         outline: none;

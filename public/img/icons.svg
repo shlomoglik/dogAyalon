@@ -22,6 +22,11 @@
 <path d="M12 12l8-8v-4h-20v4l8 8v8l4-4v-4z"></path>
 </symbol>
 
+<symbol id="icon-menu" viewBox="0 0 24 24">
+<title>menu</title>
+<path d="M3 6h18v2.016h-18v-2.016zM3 12.984v-1.969h18v1.969h-18zM3 18v-2.016h18v2.016h-18z"></path>
+</symbol>
+
 
 
 <symbol id="icon-add-to-list" viewBox="0 0 20 20">

@@ -18,6 +18,7 @@ import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarI
 import { FileUpload } from "../../commons/fileUpload/FileUpload";
 import { invitationStatus, daysOfWeek } from "../../../data/settings";
 import { hideAnimation } from "../../../sass/utils";
+import { CalendarField } from "../../components/calendarInput/CalendarField";
 
 export const NewInvitation = node => {
     const inputTypes = {
@@ -25,7 +26,8 @@ export const NewInvitation = node => {
         SELECT: "select",
         LIST: "list",
         NUMBER: "number",
-        HIDDEN: "hidden"
+        HIDDEN: "hidden",
+        DATE: "date",
     }
 
     const breeds = {
@@ -42,7 +44,7 @@ export const NewInvitation = node => {
             dogGender: { label: "מין", type: inputTypes.SELECT, options: { male: "זכר", female: "נקבה", maleB: "זכר - מסורס", femaleB: "נקבה - מעוקרת" } },
             dogBreed: { label: "גזע", type: inputTypes.SELECT, options: breeds },
             dogPhoto: { label: "תמונה", type: "hidden" },
-            age: { label: "גיל", type: inputTypes.NUMBER },
+            dob: { label: "תאריך לידה", type: inputTypes.DATE },
         },
         data: [],
         new: [],
@@ -51,7 +53,7 @@ export const NewInvitation = node => {
             dogName: "",
             dogGender: "",
             dogBreed: "",
-            age: ""
+            dob: "",
         })
     }
     const Clients = {
@@ -302,6 +304,16 @@ export const NewInvitation = node => {
                             invitation: { label: "הזמנות", icon: "icon-calendar" }
                         }
                     }),
+                    vnode.state.showCalendar !== false &&
+                    m(CalendarInput, {
+                        parent: vnode,
+                        saveOnClick: vnode.state.showCalendar.saveOnClick,
+                        model: vnode.state.showCalendar.model,
+                        doc: vnode.state.showCalendar.doc,
+                        inputKey: vnode.state.showCalendar.inputKey,
+                        label: vnode.state.showCalendar.label,
+                        rules: vnode.state.showCalendar.rules
+                    }),
 
                     vnode.state.currentTab === "contacts" && m(".owner group", [
                         m(".group__title", "פרטי קשר:"),
@@ -345,6 +357,8 @@ export const NewInvitation = node => {
                                     switch (true) {
                                         case headerObj.type === inputTypes.SELECT:
                                             return m(SelectInput, { model: Dogs, doc, index, headerKey, headerObj })
+                                        case headerObj.type === inputTypes.DATE:
+                                            return m(CalendarField, { saveOnClick: true, model: Dogs, doc, inputKey: headerKey, label: headerObj.label, rules: { [BEFORE_DATE]: new Date().toString() }, parent: vnode })
                                         case headerObj.type === inputTypes.HIDDEN: return null
                                         default:
                                             return m(Input, { model: Dogs, doc, headerKey, headerObj })
@@ -359,6 +373,8 @@ export const NewInvitation = node => {
                                     switch (true) {
                                         case headerObj.type === inputTypes.SELECT:
                                             return m(SelectInput, { doc, index, headerKey, headerObj, isNew: true })
+                                        case headerObj.type === inputTypes.DATE:
+                                            return m(CalendarField, { doc, inputKey: headerKey, label: headerObj.label, rules: { [BEFORE_DATE]: new Date().toString() }, parent: vnode })
                                         case headerObj.type === inputTypes.HIDDEN: return null
                                         default:
                                             return m(Input, { model: Dogs, doc, headerKey, headerObj, isNew: true })
@@ -375,10 +391,10 @@ export const NewInvitation = node => {
 
                     (vnode.state.currentTab === "invitation" && vnode.state.displayInvitation === "all") &&
                     m(".group group--invitation", [
-                        m(".group__title", "ההזמנות שלי:", m(Icon, {class:vnode.state.cardsDisplay.invitationFilters ? "" : "icon--action", icon: "icon-filter", action: e => toggleCardDisplay("invitationFilters") })),
+                        m(".group__title", "ההזמנות שלי:", m(Icon, { class: vnode.state.cardsDisplay.invitationFilters ? "" : "icon--action", icon: "icon-filter", action: e => toggleCardDisplay("invitationFilters") })),
                         vnode.state.cardsDisplay.invitationFilters && m(".filters", [
                             m(".filters__row",
-                                m(".filters__caption","סטטוס: "),
+                                m(".filters__caption", "סטטוס: "),
                                 [invitationStatus.NEW, invitationStatus.UPDATE_SENT, invitationStatus.CONFIRM, invitationStatus.REJECT, invitationStatus.ACTIVE, invitationStatus.DONE]
                                     .map(statusKey => {
                                         const count = countStatus(statusKey)
@@ -399,7 +415,7 @@ export const NewInvitation = node => {
                             const sDateObj = getDateObject(doc, "sDate", hasDiffes && doc.update__sDate && doc.update__sDate !== doc.sDate)
                             const eDateObj = getDateObject(doc, "eDate", hasDiffes && doc.update__eDate && doc.update__eDate !== doc.eDate)
                             return m(CardLayout, { class: "invitation" },
-                                m(Icon, { icon: "icon-launch",class:"icon--action", action: e => editInvitation(doc.docID) }),
+                                m(Icon, { icon: "icon-launch", class: "icon--action", action: e => editInvitation(doc.docID) }),
                                 m(".invitation__dogs",
                                     doc.dogs.map(dogRef => {
                                         const dog = Dogs.data.find(doc => doc.docID === dogRef)
@@ -504,63 +520,57 @@ export const NewInvitation = node => {
                                 action: e => toggleCardDisplay("dates"),
                                 icon: vnode.state.cardsDisplay.dates === true ? false : "icon-chevron-thin-up"
                             }),
-                            vnode.state.showCalendar !== false &&
-                            m(CalendarInput, {
-                                parent: vnode,
-                                doc: Invitation.current,
-                                inputKey: vnode.state.showCalendar.inputKey,
-                                label: vnode.state.showCalendar.label,
-                                rules: vnode.state.showCalendar.rules
-                            }),
 
                             vnode.state.cardsDisplay.dates && [
-                                m("label.form__row group__row", [
-                                    "מתאריך:",
-                                    m(".input",
-                                        m(".input__field selectDate", {
-                                            class: Invitation.current.sDate === "" ? "selectDate--invalid" : "",
-                                            onclick: e => {
-                                                vnode.state.showCalendar = {
-                                                    inputKey: "sDate",
-                                                    label: "מתאריך:",
-                                                    rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
-                                                }
-                                            }
-                                        },
-                                            Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
-                                            Invitation.current.sDate !== "" && m(Icon, {
-                                                icon: "icon-x", action: e => {
-                                                    e.stopPropagation();
-                                                    Invitation.current.sDate = "";
-                                                }
-                                            })
-                                        )
-                                    )
-                                ]),
+                                // m("label.form__row group__row", [
+                                //     "מתאריך:",
+                                //     m(".input",
+                                //         m(".input__field selectDate", {
+                                //             class: Invitation.current.sDate === "" ? "selectDate--invalid" : "",
+                                //             onclick: e => {
+                                //                 vnode.state.showCalendar = {
+                                //                     inputKey: "sDate",
+                                //                     label: "מתאריך:",
+                                //                     rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
+                                //                 }
+                                //             }
+                                //         },
+                                //             Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
+                                //             Invitation.current.sDate !== "" && m(Icon, {
+                                //                 icon: "icon-x", action: e => {
+                                //                     e.stopPropagation();
+                                //                     Invitation.current.sDate = "";
+                                //                 }
+                                //             })
+                                //         )
+                                //     )
+                                // ]),
+                                m(CalendarField, { doc: Invitation.current, inputKey: "sDate", label: "מתאריך: ", rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }, parent: vnode }),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime, isNew: true }),
-                                m("label.form__row group__row", [
-                                    "עד תאריך:", //eDate
-                                    m(".input",
-                                        m(".input__field selectDate", {
-                                            class: Invitation.current.eDate === "" ? "selectDate--invalid" : "",
-                                            onclick: e => {
-                                                vnode.state.showCalendar = {
-                                                    inputKey: "eDate",
-                                                    label: "עד תאריך:",
-                                                    rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
-                                                }
-                                            }
-                                        },
-                                            Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
-                                            Invitation.current.eDate !== "" && m(Icon, {
-                                                icon: "icon-x", action: e => {
-                                                    e.stopPropagation();
-                                                    Invitation.current.eDate = "";
-                                                }
-                                            })
-                                        )
-                                    )
-                                ]),
+                                // m("label.form__row group__row", [
+                                //     "עד תאריך:", //eDate
+                                //     m(".input",
+                                //         m(".input__field selectDate", {
+                                //             class: Invitation.current.eDate === "" ? "selectDate--invalid" : "",
+                                //             onclick: e => {
+                                //                 vnode.state.showCalendar = {
+                                //                     inputKey: "eDate",
+                                //                     label: "עד תאריך:",
+                                //                     rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
+                                //                 }
+                                //             }
+                                //         },
+                                //             Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
+                                //             Invitation.current.eDate !== "" && m(Icon, {
+                                //                 icon: "icon-x", action: e => {
+                                //                     e.stopPropagation();
+                                //                     Invitation.current.eDate = "";
+                                //                 }
+                                //             })
+                                //         )
+                                //     )
+                                // ]),
+                                m(CalendarField, { doc: Invitation.current, inputKey: "eDate", label: "עד תאריך:", rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }, parent: vnode }),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime, isNew: true }),
                             ],
                         ),

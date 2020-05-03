@@ -31,4 +31,11 @@
             }
         }
     }
+    .input{
+        .icon{
+            position: absolute;
+            bottom: 50%;
+            transform: translateY(100%);
+        }
+    }
 }

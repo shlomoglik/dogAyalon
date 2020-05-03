@@ -49,10 +49,7 @@ export function insertOne(sourceModel, docToAdd) {
 
 
 export function saveOne(sourceModel, docToSave, docID) {
-    if (!docID) {
-        // alert("docID is not defined")
-        throw Error("docID is not defined")
-    }
+    if (docID === undefined) return
     let saveDoc = Object.assign(docToSave, {
         updatedAt: new Date().toISOString(),
         updatedBy: auth.currentUser.uid

@@ -3,6 +3,7 @@ import "./style.scss";
 import { Icon } from "../../commons/Icon/Icon";
 import { dateFormatDMY } from "../../../js/utils";
 import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "./options";
+import { saveOne } from "../../../data/utils";
 
 export const CalendarInput = node => {
 
@@ -12,8 +13,13 @@ export const CalendarInput = node => {
     const initYear = node.attrs.year || new Date().getFullYear();
 
     const setSelectedDate = (date) => {
+        console.log("TODO: save doc ", { [node.attrs.inputKey]: date })
+        console.log(node.attrs)
         node.state.selectedDate = date;
         node.attrs.doc[node.attrs.inputKey] = date
+        if (node.attrs.saveOnClick === true) {
+            saveOne(node.attrs.model, { [node.attrs.inputKey]: date }, node.attrs.doc.docID)
+        }
     }
 
     const updateDates = () => {
@@ -34,12 +40,11 @@ export const CalendarInput = node => {
     const isDisabledDate = dateN => {
         const todayN = new Date().setHours(0, 0, 0, 0);
         let isDisabled = false;
-        //TESTME: define function using custom preferences from attrs [gt date , lt date , not in day of week , not it dates]
         if (node.attrs.rules) {
             if (node.attrs.rules[AFTER_TODAY] === true) isDisabled = dateN < todayN
             if (node.attrs.rules[AFTER_DATE] && node.attrs.rules[AFTER_DATE] !== "") isDisabled = isDisabled || dateN < new Date(node.attrs.rules[AFTER_DATE]).setHours(0, 0, 0, 0)
             if (node.attrs.rules[BEFORE_DATE] && node.attrs.rules[BEFORE_DATE] !== "") isDisabled = isDisabled || dateN > new Date(node.attrs.rules[BEFORE_DATE]).setHours(0, 0, 0, 0)
-            // TODO: add login to IS_DATES  and NOT_DATES
+            // TODO: add validation to IS_DATES  and NOT_DATES
         }
         return isDisabled
     }
