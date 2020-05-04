@@ -14,7 +14,7 @@ import { getCollectionPath, removeOneLocal, insertOne, saveOne } from "../../../
 import { SelectInput } from "../../commons/select/SelectInput";
 import { CalendarInput } from "../../components/calendarInput/CalendarInput";
 import { dateFormatDMY, distDays, isArrayEquals } from "../../../js/utils";
-import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "../../components/calendarInput/options";
+import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE, NOT_DAYS } from "../../components/calendarInput/options";
 import { FileUpload } from "../../commons/fileUpload/FileUpload";
 import { invitationStatus, daysOfWeek } from "../../../data/settings";
 import { hideAnimation } from "../../../sass/utils";
@@ -123,7 +123,8 @@ export const NewInvitation = node => {
                 sDate: "",
                 eDate: "",
                 sTime: "",
-                eTime: ""
+                eTime: "",
+                status: invitationStatus.NEW
             };
             node.state.displayInvitation = "new"
         },
@@ -135,6 +136,8 @@ export const NewInvitation = node => {
         //step 1 set as current
         Invitation.current.dogs = item.dogs.map(dogRef => Dogs.data.find(doc => doc.docID === dogRef)).filter(doc => doc !== null).map(doc => doc.docID)
         Invitation.current.contacts = item.contacts.map(contactRef => Contacts.data.find(doc => doc.docID === contactRef)).filter(doc => doc !== null).map(doc => doc.docID)
+        Invitation.current.status = item.status
+
         Invitation.current.sDate = item.sDate
         Invitation.current.eDate = item.eDate
         Invitation.current.sTime = item.sTime
@@ -158,20 +161,20 @@ export const NewInvitation = node => {
         node.state.cardsDisplay[card] = !node.state.cardsDisplay[card]
     };
 
-    const getTotalDatesStatment = () => {
-        let statement = "לא נבחרו תאריכים";
-        if (Invitation.current.sDate !== "" && Invitation.current.eDate !== "") {
-            const diff = distDays(new Date(Invitation.current.sDate), new Date(Invitation.current.eDate))
-            statement = "משך : " + diff + " יום";
-            if (Invitation.current.eTime !== "") {
-                const hour = parseInt(Invitation.current.eTime.split(":")[0])
-                if (hour >= 11) {
-                    statement += " (יציאה אחרי 11)"
-                }
-            }
-        }
-        return statement
-    }
+    // const getTotalDatesStatment = () => {
+    //     let statement = "לא נבחרו תאריכים";
+    //     if (Invitation.current.sDate !== "" && Invitation.current.eDate !== "") {
+    //         const diff = distDays(new Date(Invitation.current.sDate), new Date(Invitation.current.eDate))
+    //         statement = "משך : " + diff + " יום";
+    //         if (Invitation.current.eTime !== "") {
+    //             const hour = parseInt(Invitation.current.eTime.split(":")[0])
+    //             if (hour >= 11) {
+    //                 statement += " (יציאה אחרי 11)"
+    //             }
+    //         }
+    //     }
+    //     return statement
+    // }
 
     const isActiveFilter = (filterType, param) => node.state.filterList[filterType].includes(param)
     const hasFilters = filterType => node.state.filterList[filterType].length > 0
@@ -233,6 +236,17 @@ export const NewInvitation = node => {
     const sendInvitation = () => {
         try {
             Promise.resolve(insertOne(Invitation, Object.assign({ status: "new" }, Invitation.current)))
+                .then(() => node.state.displayInvitation = "all")
+        } catch (e) {
+            console.error(e)
+        }
+    }
+    const cancelInviation = () => {
+        try {
+            let updateDoc = {
+                status: invitationStatus.REMOVE_BY_USER,
+            }
+            Promise.resolve(saveOne(Invitation, updateDoc, Invitation.current.invitationRef))
                 .then(() => node.state.displayInvitation = "all")
         } catch (e) {
             console.error(e)
@@ -395,7 +409,7 @@ export const NewInvitation = node => {
                         vnode.state.cardsDisplay.invitationFilters && m(".filters", [
                             m(".filters__row",
                                 m(".filters__caption", "סטטוס: "),
-                                [invitationStatus.NEW, invitationStatus.UPDATE_SENT, invitationStatus.CONFIRM, invitationStatus.REJECT, invitationStatus.ACTIVE, invitationStatus.DONE]
+                                [invitationStatus.NEW, invitationStatus.UPDATE_SENT, invitationStatus.CONFIRM, invitationStatus.REJECT, invitationStatus.REMOVE_BY_USER, invitationStatus.ACTIVE, invitationStatus.DONE]
                                     .map(statusKey => {
                                         const count = countStatus(statusKey)
                                         if (!count) return null
@@ -409,12 +423,15 @@ export const NewInvitation = node => {
                             // ),
                         ]),
                         Invitation.data.map(doc => {
-                            if (hasFilters("status") && !isActiveFilter("status", doc.status)) return null
+                            if (hasFilters("status")) {
+                                if (!isActiveFilter("status", doc.status)) return null
+                            }
                             const statusObj = invitationStatus[doc.status];
-                            const hasDiffes = Object.keys(doc).some(k => k.startsWith("update__"))
+                            const hasDiffes = doc.status === invitationStatus.UPDATE_SENT && Object.keys(doc).some(k => k.startsWith("update__"))
                             const sDateObj = getDateObject(doc, "sDate", hasDiffes && doc.update__sDate && doc.update__sDate !== doc.sDate)
                             const eDateObj = getDateObject(doc, "eDate", hasDiffes && doc.update__eDate && doc.update__eDate !== doc.eDate)
-                            return m(CardLayout, { class: "invitation" },
+                            return m(CardLayout, { class: `invitation ${doc.status === invitationStatus.REMOVE_BY_USER ? "invitation--deleted" : ""}` },
+                                m("input[hidden]", { "data-id": doc.docID }),
                                 m(Icon, { icon: "icon-launch", class: "icon--action", action: e => editInvitation(doc.docID) }),
                                 m(".invitation__dogs",
                                     doc.dogs.map(dogRef => {
@@ -522,63 +539,21 @@ export const NewInvitation = node => {
                             }),
 
                             vnode.state.cardsDisplay.dates && [
-                                // m("label.form__row group__row", [
-                                //     "מתאריך:",
-                                //     m(".input",
-                                //         m(".input__field selectDate", {
-                                //             class: Invitation.current.sDate === "" ? "selectDate--invalid" : "",
-                                //             onclick: e => {
-                                //                 vnode.state.showCalendar = {
-                                //                     inputKey: "sDate",
-                                //                     label: "מתאריך:",
-                                //                     rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }
-                                //                 }
-                                //             }
-                                //         },
-                                //             Invitation.current.sDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.sDate)),
-                                //             Invitation.current.sDate !== "" && m(Icon, {
-                                //                 icon: "icon-x", action: e => {
-                                //                     e.stopPropagation();
-                                //                     Invitation.current.sDate = "";
-                                //                 }
-                                //             })
-                                //         )
-                                //     )
-                                // ]),
-                                m(CalendarField, { doc: Invitation.current, inputKey: "sDate", label: "מתאריך: ", rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate }, parent: vnode }),
+                                m(CalendarField, { doc: Invitation.current, inputKey: "sDate", label: "מתאריך: ", rules: { [AFTER_TODAY]: true, [BEFORE_DATE]: Invitation.current.eDate, [NOT_DAYS]: [7] }, parent: vnode }),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "sTime", headerObj: Invitation.headers.sTime, isNew: true }),
-                                // m("label.form__row group__row", [
-                                //     "עד תאריך:", //eDate
-                                //     m(".input",
-                                //         m(".input__field selectDate", {
-                                //             class: Invitation.current.eDate === "" ? "selectDate--invalid" : "",
-                                //             onclick: e => {
-                                //                 vnode.state.showCalendar = {
-                                //                     inputKey: "eDate",
-                                //                     label: "עד תאריך:",
-                                //                     rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }
-                                //                 }
-                                //             }
-                                //         },
-                                //             Invitation.current.eDate === "" ? "--בחר תאריך--" : dateFormatDMY(new Date(Invitation.current.eDate)),
-                                //             Invitation.current.eDate !== "" && m(Icon, {
-                                //                 icon: "icon-x", action: e => {
-                                //                     e.stopPropagation();
-                                //                     Invitation.current.eDate = "";
-                                //                 }
-                                //             })
-                                //         )
-                                //     )
-                                // ]),
-                                m(CalendarField, { doc: Invitation.current, inputKey: "eDate", label: "עד תאריך:", rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate }, parent: vnode }),
+                                m(CalendarField, { doc: Invitation.current, inputKey: "eDate", label: "עד תאריך:", rules: { [AFTER_TODAY]: true, [AFTER_DATE]: Invitation.current.sDate ,  [NOT_DAYS]: [7] }, parent: vnode }),
                                 m(Input, { model: Invitation, doc: Invitation.current, headerKey: "eTime", headerObj: Invitation.headers.eTime, isNew: true }),
                             ],
                         ),
                         // m(".total", { class: isValidInvitaion("dates") ? "" : "total--invalid" },
                         //     m(".total__text", getTotalDatesStatment()),
                         // ),
-                        (isValidInvitaion() && vnode.state.displayInvitation === "new") && m("button.button send", { onclick: e => sendInvitation() }, "שלח הזמנה"),
-                        (isValidInvitaion() && vnode.state.displayInvitation === "edit") && m("button.button send", { onclick: e => updateInviation() }, "שלח עדכון")
+                        m(".buttons",
+                            (isValidInvitaion() && vnode.state.displayInvitation === "new" && Invitation.current.status === invitationStatus.NEW) && m("button.button send", { onclick: e => sendInvitation() }, "שלח הזמנה"),
+                            (isValidInvitaion() && vnode.state.displayInvitation === "edit" && Invitation.current.status !== invitationStatus.REMOVE_BY_USER) && m("button.button send", { onclick: e => updateInviation() }, "שלח עדכון"),
+                            (isValidInvitaion() && vnode.state.displayInvitation === "edit" && Invitation.current.status !== invitationStatus.REMOVE_BY_USER) && m("button.button send button--red", { onclick: e => cancelInviation() }, "בטל הזמנה"),
+                            (isValidInvitaion() && vnode.state.displayInvitation === "edit" && Invitation.current.status === invitationStatus.REMOVE_BY_USER) && m("button.button send", { onclick: e => updateInviation() }, "שחזר הזמנה"),
+                        )
                     ])
                 ])
             )

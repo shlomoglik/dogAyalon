@@ -60,12 +60,12 @@
         border-radius: 3rem;
         cursor: pointer;
         transition: transform 0.2s;
-        color: var(--color-non-active) ;
+        color: var(--color-non-active);
         &:hover {
           transform: scale(1.1);
           box-shadow: var(--box-shadow-light);
         }
-        &--action{
+        &--action {
           color: var(--color-txt-p);
         }
       }
@@ -138,6 +138,9 @@
   padding: 2rem;
   font-size: 2rem;
   margin: 2rem;
+  &.button--red {
+    background-color: var(--color-red);
+  }
 }
 
 .input__field.selectDate {
@@ -170,11 +173,14 @@
   gap: 2rem;
   grid-template-columns: 1fr max-content;
   grid-template-rows: min-content 1fr;
-  & > .icon{
+  &--deleted {
+    opacity: 0.65;
+  }
+  & > .icon {
     grid-row: 1;
     cursor: pointer;
     border-radius: 50%;
-    &:hover{
+    &:hover {
       background-color: var(--color-bg-2);
     }
   }
@@ -185,12 +191,12 @@
     justify-content: center;
   }
   &__dog {
-    &--added{
+    &--added {
       border: 2px solid blue;
     }
-    &--removed{
+    &--removed {
       border: 2px solid red;
-      opacity: .6;
+      opacity: 0.6;
     }
     &:not(:last-child) {
       margin-left: 1rem;
@@ -199,7 +205,7 @@
       font-size: 1.4rem;
       color: var(--color-non-active);
     }
-    &--removed &-caption{
+    &--removed &-caption {
       text-decoration: line-through;
     }
   }
@@ -213,7 +219,7 @@
     margin: 1rem;
     display: grid;
     border: 1px solid #a2a2c454;
-    &--update{
+    &--update {
       border: 1px solid blue;
     }
     &-text {
@@ -226,7 +232,7 @@
       font-size: 1.2rem;
       font-weight: 500;
     }
-    &-time{
+    &-time {
       padding: 0.1rem;
       font-size: 1.2rem;
       font-weight: 500;
@@ -270,7 +276,7 @@
     flex-flow: wrap;
     align-items: center;
   }
-  &__caption{
+  &__caption {
     font-size: 1.4rem;
     font-weight: 600;
     color: var(--color-txt-p);
@@ -286,7 +292,7 @@
     font-weight: 400;
     position: relative;
     cursor: pointer;
-    transition: all .4s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+    transition: all 0.4s cubic-bezier(0.55, 0.09, 0.68, 0.53);
     .counter {
       position: absolute;
       top: 0;

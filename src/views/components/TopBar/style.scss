@@ -86,11 +86,29 @@
         }
     }
     &__item {
-        font-size: 2rem;
         padding: 1rem;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         &:hover {
             background-color: var(--color-bg-2);
+        }
+        &-text{
+            font-size: 2rem;
+            color: var(--color-non-active);
+            flex: 1;
+            margin-left: .5rem;
+        }
+        &--logout{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+        &--logout &-text{
+            font-weight: 600;
+            color: var(--color-red);
         }
     }
 }

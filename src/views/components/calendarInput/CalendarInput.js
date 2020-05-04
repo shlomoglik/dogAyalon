@@ -2,7 +2,7 @@ import m from "mithril";
 import "./style.scss";
 import { Icon } from "../../commons/Icon/Icon";
 import { dateFormatDMY } from "../../../js/utils";
-import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE } from "./options";
+import { AFTER_TODAY, AFTER_DATE, BEFORE_DATE, NOT_DAYS } from "./options";
 import { saveOne } from "../../../data/utils";
 
 export const CalendarInput = node => {
@@ -13,8 +13,6 @@ export const CalendarInput = node => {
     const initYear = node.attrs.year || new Date().getFullYear();
 
     const setSelectedDate = (date) => {
-        console.log("TODO: save doc ", { [node.attrs.inputKey]: date })
-        console.log(node.attrs)
         node.state.selectedDate = date;
         node.attrs.doc[node.attrs.inputKey] = date
         if (node.attrs.saveOnClick === true) {
@@ -37,13 +35,15 @@ export const CalendarInput = node => {
         m.redraw();
     }
 
-    const isDisabledDate = dateN => {
+    const isDisabledDate = (dateN, date) => {
         const todayN = new Date().setHours(0, 0, 0, 0);
         let isDisabled = false;
         if (node.attrs.rules) {
             if (node.attrs.rules[AFTER_TODAY] === true) isDisabled = dateN < todayN
             if (node.attrs.rules[AFTER_DATE] && node.attrs.rules[AFTER_DATE] !== "") isDisabled = isDisabled || dateN < new Date(node.attrs.rules[AFTER_DATE]).setHours(0, 0, 0, 0)
             if (node.attrs.rules[BEFORE_DATE] && node.attrs.rules[BEFORE_DATE] !== "") isDisabled = isDisabled || dateN > new Date(node.attrs.rules[BEFORE_DATE]).setHours(0, 0, 0, 0)
+            //TESTME:
+            if (node.attrs.rules[NOT_DAYS] && node.attrs.rules[NOT_DAYS].length > 0 && Array.isArray(node.attrs.rules[NOT_DAYS])) isDisabled = isDisabled || node.attrs.rules[NOT_DAYS].includes(date.getDay()+1)
             // TODO: add validation to IS_DATES  and NOT_DATES
         }
         return isDisabled
@@ -108,13 +108,16 @@ export const CalendarInput = node => {
                                 }
                             }
                         }),
-                        m(`input.input__field calendar__filter[type=number][min=${new Date().getFullYear()}]`, {
+                        m(`input.input__field calendar__filter[type=number]`, {
                             value: vnode.state.year,
                             onfocus: e => e.target.oldVal = e.target.value,
                             oninput: e => {
-                                if (e.target.value.length < 4 || e.target.value.length > 4) e.target.value = e.target.oldVal //THINK: maby settimeout
-                                else {
-                                    vnode.state.year = e.target.value;
+                                vnode.state.year = e.target.value;
+                                updateDates()
+                            },
+                            onblur: e => {
+                                if (e.target.value.length > 4 || e.target.value.length < 4) {
+                                    vnode.state.year = e.target.oldVal;
                                     updateDates()
                                 }
                             }
@@ -124,9 +127,9 @@ export const CalendarInput = node => {
                             action: e => {
                                 if (vnode.state.month == 12) {
                                     vnode.state.month = 1;
-                                    vnode.state.year = vnode.state.year + 1;
+                                    vnode.state.year = parseInt(vnode.state.year) + 1;
                                 } else {
-                                    vnode.state.month = vnode.state.month + 1
+                                    vnode.state.month = parseInt(vnode.state.month) + 1
                                 }
                                 updateDates()
                             }
@@ -139,7 +142,7 @@ export const CalendarInput = node => {
                             const dateN = date.setHours(0, 0, 0, 0);
                             const todayN = new Date().setHours(0, 0, 0, 0);
                             const isSelected = dateN === new Date(vnode.state.selectedDate).setHours(0, 0, 0, 0);
-                            const isDisabled = isDisabledDate(dateN)
+                            const isDisabled = isDisabledDate(dateN, date)
                             const isToday = dateN === todayN
                             if (ind === 0) {
                                 const dayOfWeek = date.getDay() + 1

@@ -17,30 +17,38 @@ export const loginWithGooglePopUp = async () => {
 }
 
 export const loginWithEmail = async (email, password) => {
+    const userCred
     try {
-        const userCred = await auth.signInWithEmailAndPassword(email, password);
-        await setUserDoc(userCred);
-        await setClientDoc(userCred);
-        await setCurrentUser(userCred.user)
+        userCred = await auth.signInWithEmailAndPassword(email, password);
     } catch (err) {
         console.error(err)
-        if (err.code === "auth/user-not-found") {
-            const userCred = await auth.createUserWithEmailAndPassword(email, password)
-            await setUserDoc(userCred);
-            await setClientDoc(userCred);
-            await setCurrentUser(userCred.user)
+        if (err.code === "auth/user-not-found") userCred = await auth.createUserWithEmailAndPassword(email, password)
+    } finally {
+        if(userCred){
+            const isAdmin = await setUserDoc(userCred);
+            if (isAdmin) {
+                store.isAdmin = true
+                await setAdminUser(userCred.user)
+            } else {
+                await setClientDoc(userCred);
+                await setCurrentUser(userCred.user)
+            }
         }
     }
 }
 
 const setUserDoc = async (userCred) => {
     const userDoc = db.doc(`users/${userCred.user.uid}`);
-    if (!(await userDoc.get()).exists) {
+    const doc = await userDoc.get()
+    if (!doc.exists) {
         await userDoc.set({
             displayName: userCred.user.displayName,
             email: userCred.user.email,
             photoURL: userCred.user.photoURL
         }, { merge: true });
+    }
+    if (doc.data() && doc.data().isAdmin === true) {
+        return true
     }
 }
 
@@ -55,6 +63,15 @@ const setClientDoc = async (userCred) => {
 }
 
 export const setCurrentUser = async (user) => {
+    store.user.displayName = user.displayName
+    store.user.email = user.email
+    store.user.photoURL = user.photoURL
+    const token = await user.getIdToken()
+    sessionStorage.setItem("token", token)
+    m.route.set("/app/invite");
+    m.redraw()
+}
+export const setAdminUser = async (user) => {
     store.user.displayName = user.displayName
     store.user.email = user.email
     store.user.photoURL = user.photoURL

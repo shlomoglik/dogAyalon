@@ -56,7 +56,7 @@ export const FileUpload = node => {
             node.state.fileUrl = reader.result
             node.state.fileType = files[0].type
             node.state.showPopUp = true;
-            node.state.fileBlob = files[0]
+            node.state.fileBlob = files[0];
             m.redraw()
         };
         reader.readAsDataURL(files[0]);
@@ -86,6 +86,7 @@ export const FileUpload = node => {
     }
 
     return {
+        id: +new Date(),
         isStorageFile: false,
         fileBlob: null,
         fileUrl: "",
@@ -108,7 +109,7 @@ export const FileUpload = node => {
                 },
                     m(".showImg__box", { onclick: e => { } }, [
                         vnode.state.fileUrl === "" ?
-                            m("label.showImg__noImage[for=file]", {
+                            m(`label.showImg__noImage[for=${vnode.state.id}]`, {
                                 class: vnode.state.drag ? "droparea" : vnode.state.hover ? "hover" : "",
                                 onmouseenter: e => { vnode.state.drag ? "" : vnode.state.hover = true },
                                 onmouseleave: e => { vnode.state.hover = false },
@@ -141,7 +142,7 @@ export const FileUpload = node => {
                     ])
                 ),
                 vnode.state.fileUrl === "" ? m(Icon, { class: "file__thumb", icon: "icon-pictures", action: e => vnode.state.showPopUp = true }) : m("img.file__thumb", { src: vnode.state.fileUrl, onclick: e => vnode.state.showPopUp = true }),
-                m("input.[type=file][hidden]#file", { onchange: e => uploadBlob(e.target.files) })
+                m(`input.[type=file][hidden]#${vnode.state.id}`, { onchange: e => uploadBlob(e.target.files) })
             )
         }
     }

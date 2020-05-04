@@ -1,6 +1,6 @@
 {
-    "short_name": "starter",
-    "name": "starter-app-mithril-and-firebase",
+    "short_name": "הכלבייה שלי",
+    "name": "פנסיון הכלבים בחוות עמק איילון",
     "icons": [
         {
             "src": "./img/logo.png",
@@ -17,8 +17,8 @@
         }
     ],
     "start_url": "/",
-    "background_color": "#f14a4a",
+    "background_color": "#fff8",
     "display": "standalone",
     "scope": "/",
-    "theme_color": "#f14a4a"
+    "theme_color": "#fff8"
 }

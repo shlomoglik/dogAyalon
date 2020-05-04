@@ -1,4 +1,16 @@
-<!-- TOOD: login + sign in + remove invitation + admin panel!!!-->
+<!-- TOOD:
+    - admin panel:
+        - all contacts by client grouping  , using search: clientName,clientEmail,clientEmailPhone,dogName
+        - all dogs by client grouping  , using search: clientName,clientEmail,clientEmailPhone,dogName
+        - all invitation by client grouping  , using dates filter + status filter
+        - check-ins + check-outs
+    - create register form
+    - validation procces : email verify? phone verify ?  
+    - create user photo uploader
+    - create nav tabs query by param ex: /app/invite?tab=dogs 
+    - create date display view for dob -> age based
+    - main nav styling + animation + icons + logout
+-->
 
 # DB map 
 - Clients (clients<->users)
